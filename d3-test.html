@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <script>
+        var changes = {
+            title: 'Upstream Changes',
+            key: 'upstream-changes',
+            message: 'Someone else has been working here!',
+            currentBranch: "feature",
+            commitData: [
+            {
+                "id": "e137e9b",
+                "tags": [],
+                "message": "first commit",
+                "parent": "initial",
+            },
+            {
+                "id": "84c98fe",
+                "parent": "e137e9b",
+                "tags": [ "master", "origin/master" ],
+            },
+            {
+                "id": "1c016b6",
+                "parent": "e137e9b",
+                "tags": [ "feature", "origin/feature", "HEAD" ],
+            }
+            ]
+        }
+
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", 500)
+            .attr("height", 500);
+
+        var circles = svg.selectAll("circle")
+            .data(changes.commitData)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d, i) { return 100 + i * 100; })  // Adjust as needed
+            .attr("cy", 250)
+            .attr("r", 20)
+            .style("fill", "red");       
+
+        var links = changes.commitData.slice(1).map(function(d, i) {
+            return {
+                source: {x: 250, y: 100 + i * 100},
+                target: {x: 250, y: 100 + (i + 1) * 100}
+            };
+        });
+
+        var link = d3.linkHorizontal()
+            .x(function(d) { return d.y; })
+            .y(function(d) { return d.x; });
+
+        svg.selectAll('path')
+            .data(links)
+            .enter()
+            .append('path')
+            .attr('d', link)
+            .style('stroke', 'black')
+            .style('fill', 'none');
+    </script>
+</body>
+</html>
