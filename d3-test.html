@@ -44,16 +44,23 @@
             .attr("r", 20)
             .style("fill", "red");       
 
-        var links = changes.commitData.slice(1).map(function(d, i) {
+        var idToNode = {};
+            changes.commitData.forEach(function(d, i) {
+            d.x = 100 + i * 100;  // Compute x position based on index
+            d.y = 250;  // Set y position to a constant value
+            idToNode[d.id] = d;
+        });
+
+        var links = changes.commitData.slice(1).map(function(d) {
             return {
-                source: {x: 250, y: 100 + i * 100},
-                target: {x: 250, y: 100 + (i + 1) * 100}
+                source: idToNode[d.parent],
+                target: d
             };
         });
 
         var link = d3.linkHorizontal()
-            .x(function(d) { return d.y; })
-            .y(function(d) { return d.x; });
+            .x(function(d) { return d.x; })
+            .y(function(d) { return d.y; });
 
         svg.selectAll('path')
             .data(links)
