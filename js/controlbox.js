@@ -129,16 +129,16 @@ function(_yargs, d3, demos) {
         }
       })
 
-      log = cBoxContainer.append('div')
-        .classed('log', true);
-
       input = cBoxContainer.append('input')
         .attr('type', 'text')
         .classed('input', true)
         .attr('placeholder', 'enter git command');
 
-      log.on('click', function () {
-        if (d3.event.target === log.node()) {
+      log = cBoxContainer.append('div')
+        .classed('log', true);
+
+      log.on('click', function (e) {
+        if (e.target === log.node()) {
           input.node().focus()
         }
       })
@@ -147,9 +147,7 @@ function(_yargs, d3, demos) {
         input.node().focus()
       })
 
-      input.on('keyup', function() {
-        var e = d3.event;
-
+      input.on('keyup', function(e) {
         switch (e.keyCode) {
           case 13:
             if (this.value.trim() === '' || cBox.locked) {

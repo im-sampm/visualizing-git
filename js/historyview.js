@@ -1,4 +1,4 @@
-define(['d3'], function() {
+define(['d3'], function(d3) {
   "use strict";
 
   var REG_MARKER_END = 'url(#triangle)',
@@ -520,9 +520,9 @@ define(['d3'], function() {
         .classed('svg-container', true)
         .classed('remote-container', this.isRemote);
 
-      if (this.isRemote) {
-        $(svgContainer).draggable();
-      }
+      // if (this.isRemote) {
+      //   $(svgContainer).draggable();
+      // }
 
       svg = svgContainer.append('svg:svg');
 
