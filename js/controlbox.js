@@ -231,6 +231,7 @@ function(_yargs, d3, demos) {
         this.info('redo = Redo the last undone git command')
         this.info('mode = Change mode (`local` or `remote`)')
         this.info('clear = Clear the history pane and reset the visualization')
+        this.info('save-script = Save the commitData to disk')
         this.info('save-svg = Save the visualization to disk')
         this.info()
         this.info('Available Git Commands:')
@@ -302,6 +303,33 @@ function(_yargs, d3, demos) {
       if (entry.toLowerCase() === 'clear') {
         window.resetVis()
         return
+      }
+
+      if (entry.toLowerCase() === 'save-script') {
+
+        var script =  {
+          title: "title",
+          key: "title",
+          message: "",
+          commitData: JSON.parse(JSON.stringify(this.historyView.commitData)),
+        };
+
+        var scriptJSON = JSON.stringify(script, null, 2);
+
+        var blob = new Blob([scriptJSON], {type: 'text/plain'});
+        var url = URL.createObjectURL(blob);
+
+        // Create an anchor element
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'gitvis-script.txt';
+        document.body.appendChild(a);
+
+        a.click();
+
+        document.body.removeChild(a);
+
+        return;
       }
 
       if (entry.toLowerCase() === 'save-svg') {
