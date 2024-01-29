@@ -683,7 +683,7 @@ define(['d3'], function(d3) {
         newPointers;
 
       existingPointers = this.arrowBox.selectAll('line.commit-pointer')
-        .data(this.commitData, function(d) {
+        .data(this.commitData.slice(1), function(d) {
           return d.id;
         })
         .attr('id', function(d) {
