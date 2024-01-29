@@ -231,6 +231,7 @@ function(_yargs, d3, demos) {
         this.info('redo = Redo the last undone git command')
         this.info('mode = Change mode (`local` or `remote`)')
         this.info('clear = Clear the history pane and reset the visualization')
+        this.info('save-svg = Save the visualization to disk')
         this.info()
         this.info('Available Git Commands:')
         this.info('`git branch`')
@@ -300,6 +301,82 @@ function(_yargs, d3, demos) {
 
       if (entry.toLowerCase() === 'clear') {
         window.resetVis()
+        return
+      }
+
+      if (entry.toLowerCase() === 'save-svg') {
+        // Get the SVG element
+        var svg = document.querySelector('svg#ExplainGitZen');
+
+        // Store the original attributes
+        var originalWidth = svg.getAttribute('width');
+        var originalHeight = svg.getAttribute('height');
+        var originalViewBox = svg.getAttribute('viewBox');
+        var originalPreserveAspectRatio = svg.getAttribute('preserveAspectRatio');
+
+        // Get the two top-level child text elements
+        var textElements = svg.querySelectorAll(':scope > text:nth-child(-n+2)');
+
+        // Hide the text elements
+        textElements.forEach(function(textElement) {
+          textElement.style.display = 'none';
+        });
+
+        // Get the bounding box of the SVG element
+        var bbox = svg.getBBox();
+
+        // Set the width, height, viewBox, and preserveAspectRatio attributes of the SVG element
+        svg.setAttribute('width', bbox.width);
+        svg.setAttribute('height', bbox.height);
+        svg.setAttribute('viewBox', bbox.x + ' ' + bbox.y + ' ' + bbox.width + ' ' + bbox.height);
+
+        // Clone the marker definitions
+        var markers = document.querySelectorAll('svg > marker');
+        markers.forEach(function(marker) {
+          svg.appendChild(marker.cloneNode(true));
+        });
+
+        // Get the computed style for each element in the SVG and set it as an inline style
+        var elements = svg.querySelectorAll('*');
+        for (var i = 0; i < elements.length; i++) {
+          var computedStyle = window.getComputedStyle(elements[i]);
+          var inlineStyle = '';
+          for (var j = 0; j < computedStyle.length; j++) {
+            var property = computedStyle[j];
+            inlineStyle += property + ':' + computedStyle.getPropertyValue(property) + ';';
+          }
+          elements[i].setAttribute('style', inlineStyle);
+        }
+
+        // Create a new Blob with the SVG data and type
+        var svgData = new XMLSerializer().serializeToString(svg);
+        var blob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
+
+        // Create a downloadable link for the Blob
+        var url = URL.createObjectURL(blob);
+        var downloadLink = document.createElement('a');
+        downloadLink.href = url;
+        downloadLink.download = 'image.svg';
+
+        // Append the link to the document and simulate a click
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        // Clean up by removing the link
+        document.body.removeChild(downloadLink);
+
+        // Clean up styles
+        for (var i = 0; i < elements.length; i++) {
+          for (var i = 0; i < elements.length; i++) {
+            elements[i].removeAttribute('style');
+          }
+        }
+
+        // Restore the original attributes
+        svg.setAttribute('width', originalWidth);
+        svg.setAttribute('height', originalHeight);
+        svg.setAttribute('viewBox', originalViewBox);
+
         return
       }
 
