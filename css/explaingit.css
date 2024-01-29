@@ -201,7 +201,7 @@ span.cmd {
 circle.commit {
   fill: #CCCCCC;
   stroke: #888888;
-  stroke-width: 3;
+  stroke-width: 1;
   transition-property: stroke, fill;
   transition-duration: 500ms;
   transition-timing-function: ease-out;
@@ -255,14 +255,14 @@ circle.commit.logging {
 }
 
 .commit-pointer {
-  stroke: rgba(100, 100, 100, 0.5);
-  stroke-width: 4;
+  stroke: rgba(100, 100, 100, 1);
+  stroke-width: 2;
 }
 
 .merge-pointer {
-  stroke: rgba(100, 100, 100, 0.5);
-  stroke-width: 4;
-  stroke-dasharray: 15, 4;
+  stroke: rgba(204, 29, 29, 0.5);
+  stroke-width: 2;
+  stroke-dasharray: 5, 3;
 }
 
 .commit-pointer.branchless, .merge-pointer.branchless {
@@ -287,13 +287,13 @@ text.message-label {
 
 g.branch-tag > rect {
   fill: #FFCC66;
-  stroke: #CC9900;
-  stroke-width: 2;
+  /* stroke: #CC9900; */
+  /* stroke-width: 2; */
 }
 
 g.branch-tag.git-tag > rect {
   fill: #7FC9FF;
-  stroke: #0026FF;
+  /* stroke: #0026FF; */
 }
 
 g.branch-tag.remote-branch > rect {
@@ -310,8 +310,8 @@ g.branch-tag > text {
 
 g.head-tag > rect {
   fill: #CCFFCC;
-  stroke: #339900;
-  stroke-width: 2;
+  /* stroke: #339900; */
+  /* stroke-width: 2; */
 }
 
 g.head-tag > text {
