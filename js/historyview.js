@@ -8,8 +8,8 @@ define(['d3'], function(d3) {
     preventOverlap,
     applyBranchlessClass,
     cx, cy, fixCirclePosition,
-    px1, py1, fixPointerStartPosition,
-    px2, py2, fixPointerEndPosition,
+    px1, py1, 
+    px2, py2, 
     fixIdPosition, tagY, getUniqueSetItems;
 
   preventOverlap = function preventOverlap(commit, view) {
@@ -132,66 +132,30 @@ define(['d3'], function(d3) {
   px1 = function(commit, view, pp) {
     pp = pp || 'parent';
 
-    var parent = view.getCommit(commit[pp]),
-      startCX = commit.cx,
-      diffX = startCX - parent.cx,
-      diffY = parent.cy - commit.cy,
-      length = Math.sqrt((diffX * diffX) + (diffY * diffY));
-
-    return startCX - (view.pointerMargin * (diffX / length));
+    var parent = view.getCommit(commit[pp]);
+    return parent.cx+20;
   };
 
   // calculates the y1 point for commit pointer lines
   py1 = function(commit, view, pp) {
     pp = pp || 'parent';
 
-    var parent = view.getCommit(commit[pp]),
-      startCY = commit.cy,
-      diffX = commit.cx - parent.cx,
-      diffY = parent.cy - startCY,
-      length = Math.sqrt((diffX * diffX) + (diffY * diffY));
-
-    return startCY + (view.pointerMargin * (diffY / length));
-  };
-
-  fixPointerStartPosition = function(selection, view) {
-    selection.attr('x1', function(d) {
-      return px1(d, view);
-    }).attr('y1', function(d) {
-      return py1(d, view);
-    });
+    var parent = view.getCommit(commit[pp]);
+    return parent.cy;
   };
 
   px2 = function(commit, view, pp) {
     pp = pp || 'parent';
 
-    var parent = view.getCommit(commit[pp]),
-      endCX = parent.cx,
-      diffX = commit.cx - endCX,
-      diffY = parent.cy - commit.cy,
-      length = Math.sqrt((diffX * diffX) + (diffY * diffY));
-
-    return endCX + (view.pointerMargin * (diffX / length));
+    var parent = view.getCommit(commit[pp]);
+    return commit.cx-23;
   };
 
   py2 = function(commit, view, pp) {
     pp = pp || 'parent';
 
-    var parent = view.getCommit(commit[pp]),
-      endCY = parent.cy,
-      diffX = commit.cx - parent.cx,
-      diffY = endCY - commit.cy,
-      length = Math.sqrt((diffX * diffX) + (diffY * diffY));
-
-    return endCY - (view.pointerMargin * (diffY / length));
-  };
-
-  fixPointerEndPosition = function(selection, view) {
-    selection.attr('x2', function(d) {
-      return px2(d, view);
-    }).attr('y2', function(d) {
-      return py2(d, view);
-    });
+    var parent = view.getCommit(commit[pp]);
+    return commit.cy;
   };
 
   fixIdPosition = function(selection, view, delta) {
@@ -682,36 +646,29 @@ define(['d3'], function(d3) {
         existingPointers,
         newPointers;
 
-      existingPointers = this.arrowBox.selectAll('line.commit-pointer')
-        .data(this.commitData.slice(1), function(d) {
+      var link = d3.linkHorizontal()
+        .source(d => [px1(d, view), py1(d, view)])
+        .target(d => [px2(d, view), py2(d, view)])
+
+      existingPointers = this.arrowBox.selectAll('path.commit-pointer')
+        .data(this.commitData.slice(1), function (d) {
           return d.id;
         })
-        .attr('id', function(d) {
+        .attr('id', function (d) {
           return view.name + '-' + d.id + '-to-' + d.parent;
-        });
-
-      existingPointers.transition()
-        .duration(500)
-        .call(fixPointerStartPosition, view)
-        .call(fixPointerEndPosition, view);
+        })
+        .attr('d', link)
+        .attr('marker-end', 'url(#triangle)');
 
       newPointers = existingPointers.enter()
-        .append('svg:line')
-        .attr('id', function(d) {
+        .append('path')
+        .attr('class', 'commit-pointer')
+        .attr("fill", "none")
+        .attr('id', function (d) {
           return view.name + '-' + d.id + '-to-' + d.parent;
         })
-        .classed('commit-pointer', true)
-        .call(fixPointerStartPosition, view)
-        .attr('x2', function() {
-          return d3.select(this).attr('x1');
-        })
-        .attr('y2', function() {
-          return d3.select(this).attr('y1');
-        })
-        .attr('marker-start', REG_MARKER_END)
-        .transition()
-        .duration(500)
-        .call(fixPointerEndPosition, view);
+        .attr('d', link)
+        .attr('marker-end', 'url(#triangle)');
 
       existingPointers.exit()
         .remove()
@@ -728,47 +685,29 @@ define(['d3'], function(d3) {
           mergeCommits.push(commit);
         }
       }
+      var link = d3.linkHorizontal()
+        .source(d => [px1(d, view, 'parent2'), py1(d, view, 'parent2')])
+        .target(d => [px2(d, view, 'parent2'), py2(d, view, 'parent2')])
 
-      existingPointers = this.arrowBox.selectAll('polyline.merge-pointer')
+      existingPointers = this.arrowBox.selectAll('path.merge-pointer')
         .data(mergeCommits, function(d) {
           return d.id;
         })
         .attr('id', function(d) {
           return view.name + '-' + d.id + '-to-' + d.parent2;
-        });
-
-      existingPointers.transition().duration(500)
-        .attr('points', function(d) {
-          var p1 = px1(d, view, 'parent2') + ',' + py1(d, view, 'parent2'),
-            p2 = px2(d, view, 'parent2') + ',' + py2(d, view, 'parent2');
-
-          return [p1, p2].join(' ');
-        });
+        })
+        .attr('d', link)
+        .attr('marker-end', 'url(#triangle)');
 
       newPointers = existingPointers.enter()
-        .append('svg:polyline')
-        .attr('id', function(d) {
-          return view.name + '-' + d.id + '-to-' + d.parent2;
+        .append('path')
+        .attr('class', 'merge-pointer')
+        .attr("fill", "none")
+        .attr('id', function (d) {
+          return view.name + '-' + d.id + '-to-' + d.parent;
         })
-        .classed('merge-pointer', true)
-        .attr('points', function(d) {
-          var x1 = px1(d, view, 'parent2'),
-            y1 = py1(d, view, 'parent2'),
-            p1 = x1 + ',' + y1;
-
-          return [p1, p1].join(' ');
-        })
-        .attr('marker-start', MERGE_MARKER_END)
-        .transition()
-        .duration(500)
-        .attr('points', function(d) {
-          var points = d3.select(this).attr('points').split(' '),
-            x2 = px2(d, view, 'parent2'),
-            y2 = py2(d, view, 'parent2');
-
-          points[1] = x2 + ',' + y2;
-          return points.join(' ');
-        });
+        .attr('d', link)
+        .attr('marker-end', 'url(#triangle)');
 
       existingPointers.exit()
         .remove()
