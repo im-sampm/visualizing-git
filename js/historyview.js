@@ -685,6 +685,7 @@ define(['d3'], function(d3) {
           mergeCommits.push(commit);
         }
       }
+
       var link = d3.linkHorizontal()
         .source(d => [px1(d, view, 'parent2'), py1(d, view, 'parent2')])
         .target(d => [px2(d, view, 'parent2'), py2(d, view, 'parent2')])
@@ -697,7 +698,7 @@ define(['d3'], function(d3) {
           return view.name + '-' + d.id + '-to-' + d.parent2;
         })
         .attr('d', link)
-        .attr('marker-end', 'url(#triangle)');
+        .attr('marker-end', 'url(#red-triangle)');
 
       newPointers = existingPointers.enter()
         .append('path')
@@ -707,7 +708,7 @@ define(['d3'], function(d3) {
           return view.name + '-' + d.id + '-to-' + d.parent;
         })
         .attr('d', link)
-        .attr('marker-end', 'url(#triangle)');
+        .attr('marker-end', 'url(#red-triangle)');
 
       existingPointers.exit()
         .remove()
