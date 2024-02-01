@@ -300,6 +300,37 @@ function(_yargs, d3, demos) {
         return
       }
 
+      if (entry.toLowerCase() === 'replay') {
+
+        var length = this.undoHistory.stack.length;
+
+        for (let i = 0; i < length; i++) {
+          ((index) => {
+            setTimeout(() => {
+              var lastState = this.undoHistory.stack[index];
+              if (lastState) {
+                this.historyView.deserialize(lastState.hv);
+                this.originView && this.originView.deserialize(lastState.ov);
+              } else {
+                this.error("Nothing to redo");
+              }
+              if (this.historyView.logs.head) {
+                var reason = this.historyView.logs.head[0].reason;
+                
+                this.terminalOutput
+                  .append("div")
+                  .classed("command-entry", true)
+                  .html(reason);
+              }
+
+              this._scrollToBottom();
+            }, index * 1000);
+          })(i);
+        }
+        return;
+      }
+
+
       if (entry.toLowerCase() === 'clear') {
         window.resetVis()
         return
