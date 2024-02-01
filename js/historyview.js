@@ -480,9 +480,7 @@ define(['d3'], function(d3) {
     render: function(container) {
       var svgContainer, svg;
 
-      svgContainer = container.append('div')
-        .classed('svg-container', true)
-        .classed('remote-container', this.isRemote);
+      svgContainer = container.select('.svg-container');
 
       // if (this.isRemote) {
       //   $(svgContainer).draggable();

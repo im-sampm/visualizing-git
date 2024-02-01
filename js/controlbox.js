@@ -99,11 +99,8 @@ function(_yargs, d3, demos) {
       var cBox = this,
         cBoxContainer, log, input, selector;
 
-      cBoxContainer = container.append('div')
-        .classed('control-box', true);
-
-      selector = cBoxContainer.append('select')
-        .classed('scenario-chooser', true)
+      cBoxContainer = container.select('.control-box');
+      selector = container.select('.scenario-chooser');
 
       demos.forEach(function (demo) {
         var opt = selector.append('option')
@@ -129,14 +126,9 @@ function(_yargs, d3, demos) {
         }
       })
 
-      input = cBoxContainer.append('input')
-        .attr('type', 'text')
-        .classed('input', true)
-        .attr('placeholder', 'enter git command');
+      input = container.select('input.input');
 
-      log = cBoxContainer.append('div')
-        .classed('log', true);
-
+      log = container.select('div.log');
       log.on('click', function (e) {
         if (e.target === log.node()) {
           input.node().focus()
@@ -316,6 +308,7 @@ function(_yargs, d3, demos) {
               }
               if (this.historyView.logs.head) {
                 var reason = this.historyView.logs.head[0].reason;
+                console.log(this.historyView.logs.head[0]);
                 
                 this.terminalOutput
                   .append("div")

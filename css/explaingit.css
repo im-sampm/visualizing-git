@@ -81,12 +81,19 @@ span.cmd {
   bottom: 0;
   right: 0;
   left: 0;
+  width: 800px;
+  height: 600px;
+}
+
+#ExplainGitZen-Container .scenario-chooser {
+  float: right;
 }
 
 #ExplainGitZen-Container .svg-container {
-  display: inline-block;
+  display: block;
   border: 1px dotted #AAA;
-  position: absolute;
+  height: 100%;
+  /* position: absolute; */
   top: 0;
   bottom: 0;
   right: 0;
@@ -120,11 +127,11 @@ span.cmd {
 }
 
 .control-box {
-  display: inline-block;
-  position: absolute;
+  display: block;
+  /* position: absolute; */
   top: 0px;
   bottom: 0;
-  width: 250px;
+  /* width: 250px; */
   vertical-align: bottom;
   border: 1px dotted #AAA;
 }
@@ -144,7 +151,7 @@ span.cmd {
 
 .control-box .log {
   overflow-y: auto;
-  position: absolute;
+  /* position: absolute; */
   background: #000;
   top: 30px;
   bottom: 20px;
@@ -165,19 +172,19 @@ span.cmd {
 }
 
 .control-box .log .command-entry {
-  padding-left: 15px;
+  padding-left: 5px;
   color: #FFF;
   line-height: 14px;
-  background: url(../images/prompt.gif) no-repeat left top black;
+  /* background: url(../images/prompt.gif) no-repeat left top black; */
 }
 
 .control-box input[type="text"] {
-  position: absolute;
+  /* position: absolute; */
   bottom: 0;
-  padding-left: 15px;
-  color: #FFF;
+  /* padding-left: 15px; */
+  /* color: #FFF; */
   line-height: 14px;
-  background: url(../images/prompt.gif) no-repeat left center black;
+  /* background: url(../images/prompt.gif) no-repeat left center black; */
 }
 
 .control-box .log .info, .control-box .log .error {
@@ -194,7 +201,8 @@ span.cmd {
 }
 
 .control-box input[type="text"] {
-  width: 235px;
+  width: 100%;
+  display: block;
   border: none;
 }
 
