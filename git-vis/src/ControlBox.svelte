@@ -1,7 +1,67 @@
 <script>
+import { onMount } from 'svelte';
 // import yargsParser from 'https://unpkg.com/yargs-parser@19.0.0/browser.js'
 import * as d3 from 'd3';
 import demos from './demos.mjs';
+
+const prefix = 'ExplainGit';
+
+onMount(() => {
+  open2();
+});
+
+function cleanHash (hash) {
+  return hash.replace(/^#/, '')
+}
+
+function findDemo (demos, name) {
+  return demos.filter(function (d) {
+    return d.key === name
+  })[0]
+}
+
+function copyDemo (demo) {
+  // make a deep copy
+  return JSON.parse(JSON.stringify(demo))
+}
+
+export let lastDemo = findDemo(demos, cleanHash(window.location.hash)) || demos[0]
+
+function open2() {
+
+  var initial = Object.assign(copyDemo(lastDemo), {
+    name: 'Zen',
+    height: '100%',
+    initialMessage: "",
+  })
+
+  open(initial);
+}
+
+
+const open = function(_args) {
+  var args = Object.create(_args),
+    name = prefix + args.name,
+    containerId = name + '-Container',
+    container = d3.select('#' + containerId),
+    playground = container.select('.playground-container'),
+    historyView, originView = null,
+    controlBox;
+
+  container.style('display', 'block');
+
+  args.name = name;
+  args.savedState = args.hvSavedState;
+
+  controlBox = new ControlBox({
+    historyView: null,
+    originView: null,
+    initialMessage: args.initialMessage,
+    undoHistory: args.undoHistory
+  });
+
+  controlBox.render(playground);
+}
 
 
 function yargs(str, opts) {
@@ -28,20 +88,26 @@ function ControlBox(config) {
   this._tempCommand = '';
   this.rebaseConfig = {}; // to configure branches for rebase
 
+  this.locked = false;
+  this.container = null;
+  this.terminalOutput = null;
+  this.input = null;
+
+
   this.undoHistory = config.undoHistory || {
     pointer: 0,
     stack: [
       {
-        hv: this.historyView.serialize(),
-        ov: this.originView && this.originView.serialize()
+        // hv: this.historyView.serialize(),
+        // ov: this.originView && this.originView.serialize()
       }
     ]
   }
 
   this.mode = 'local'
 
-  this.historyView.on('lock', this.lock.bind(this))
-  this.historyView.on('unlock', this.unlock.bind(this))
+  // this.historyView.on('lock', this.lock.bind(this))
+  // this.historyView.on('unlock', this.unlock.bind(this))
 }
 
 ControlBox.prototype = {
@@ -113,10 +179,10 @@ ControlBox.prototype = {
       }
     })
 
-    selector.on('change', function () {
+    selector.on('change', function (e) {
       if (!confirm('This will erase your current progress. Continue?')) {
-        d3.event.preventDefault()
-        d3.event.stopPropagation()
+        e.preventDefault()
+        e.stopPropagation()
         selector.node().value = window.location.hash.replace(/^#/, '') || demos[0].key
         return false
       }
@@ -183,7 +249,7 @@ ControlBox.prototype = {
           e.stopImmediatePropagation();
           break;
         default:
-          document.getElementById('last-command').textContent = document.querySelectorAll(".control-box .input")[0].value
+          document.getElementById('last-command').textContent = document.querySelectorAll(".control-box .input")[0].textContent;
       }
 
     });
@@ -248,10 +314,10 @@ ControlBox.prototype = {
       return
     }
 
-    if (entry === 'pres()') {
-      window.pres()
-      return
-    }
+    // if (entry === 'pres()') {
+    //   window.pres()
+    //   return
+    // }
 
     if (entry.toLowerCase().indexOf('mode ') === 0) {
       var mode = entry.split(' ').pop()
@@ -1050,7 +1116,7 @@ ControlBox.prototype = {
 </script>
 
 <pre id='last-command' style='display: none;'></pre>
-<div class="control-box">
+<div class="control-box" style="color: black;">
   <select class="scenario-chooser"></select>
   <input type="text" class="input" placeholder="enter git command">
   <div class="log"></div>
