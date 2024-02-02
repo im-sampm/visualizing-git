@@ -92,7 +92,7 @@
 
 </script>
 
-<main>
+<main style="width:800px; height: 600px" class="p-8">
 
   <ExplainGit />
 

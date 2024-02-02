@@ -3,6 +3,7 @@ import { onMount } from 'svelte';
 import HistoryView from './HistoryView.svelte';
 import ControlBox from './ControlBox.svelte';
 import * as d3 from 'd3';
+import { Tabs, TabItem } from 'flowbite-svelte';
 import demos from './demos.mjs';
 import { lastDemo } from './store.js';
 
@@ -180,17 +181,19 @@ const explainGit = {
 };
 </script>
 
-<div id="ExplainGitZen-Container" style="display:none">
-    <div class="playground-container">
-      <HistoryView />
-      <ControlBox />
-      <!-- <div class="svg-container">
-        <select class="scenario-chooser"></select>
+<Tabs id="ExplainGitZen-Container" class="p-8">
+    <TabItem open title="Playground">
+      <div class="playground-container">
+        <HistoryView />
+        <ControlBox />
+        <!-- <div class="svg-container">
+          <select class="scenario-chooser"></select>
+        </div>
+        <pre id='last-command' style='display: none;'></pre>
+        <div class="control-box">
+          <input type="text" class="input" placeholder="enter git command">
+          <div class="log"></div>
+        </div> -->
       </div>
-      <pre id='last-command' style='display: none;'></pre>
-      <div class="control-box">
-        <input type="text" class="input" placeholder="enter git command">
-        <div class="log"></div>
-      </div> -->
-    </div>
-</div>
+    </TabItem>
+</Tabs>

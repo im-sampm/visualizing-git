@@ -49,7 +49,6 @@ const open = function(_args) {
     name = prefix + args.name,
     containerId = name + '-Container',
     container = d3.select('#' + containerId),
-    playground = container.select('.playground-container'),
     originView = null,
     controlBox;
 
@@ -65,7 +64,7 @@ const open = function(_args) {
     undoHistory: args.undoHistory
   });
 
-  controlBox.render(playground);
+  controlBox.render();
 
   console.log("ControlBox initialized");
 }
@@ -177,12 +176,12 @@ ControlBox.prototype = {
     }
   },
 
-  render: function(container) {
+  render: function() {
     var cBox = this,
       cBoxContainer, log, input, selector;
 
-    cBoxContainer = container.select('.control-box');
-    selector = container.select('.scenario-chooser');
+    cBoxContainer = d3.select('.control-box');
+    selector = d3.select('.scenario-chooser');
 
     demos.forEach(function (demo) {
       var opt = selector.append('option')
@@ -208,9 +207,9 @@ ControlBox.prototype = {
       }
     })
 
-    input = container.select('input.input');
+    input = d3.select('input.input');
 
-    log = container.select('div.log');
+    log = d3.select('div.log');
     console.log("Log: ", log);
     log.on('click', function (e) {
       if (e.target === log.node()) {

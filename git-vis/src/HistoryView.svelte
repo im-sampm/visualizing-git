@@ -36,7 +36,6 @@ const open = function(_args) {
     name = prefix + args.name,
     containerId = name + '-Container',
     container = d3.select('#' + containerId),
-    playground = container.select('.playground-container'),
     originView = null,
     controlBox;
 
@@ -48,7 +47,7 @@ const open = function(_args) {
 
   console.log("og historyView: ", hv);
 
-  hv.render(playground);
+  hv.render();
   console.log("HistoryView initialized");
   // window.hv = historyView;
 }
@@ -537,11 +536,10 @@ HistoryView.prototype = {
    * @method render
    * @param container {String} selector for the container to render the SVG into
    */
-  render: function(container) {
+  render: function() {
     var svgContainer, svg;
-    console.log("poo: ", container);
 
-    svgContainer = container.select('.svg-container');
+    svgContainer = d3.select('.svg-container');
 
     // if (this.isRemote) {
     //   $(svgContainer).draggable();
@@ -1495,5 +1493,5 @@ HistoryView.prototype = {
 };
 </script>
 
-<div class="svg-container">
+<div class="svg-container" style="background-color: white; height: 400px;">
 </div>
