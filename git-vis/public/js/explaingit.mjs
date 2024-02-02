@@ -46,6 +46,8 @@ open = function(_args) {
   });
   window.cb = controlBox;
 
+  console.log("playground", playground.attr("id"));
+
   controlBox.render(playground);
   historyView.render(playground);
   // Create a new zoom behavior

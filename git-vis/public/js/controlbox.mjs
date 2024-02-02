@@ -130,6 +130,7 @@ ControlBox.prototype = {
     input = container.select('input.input');
 
     log = container.select('div.log');
+    console.log("Log: ", log);
     log.on('click', function (e) {
       if (e.target === log.node()) {
         input.node().focus()
@@ -326,7 +327,7 @@ ControlBox.prototype = {
 
 
     if (entry.toLowerCase() === 'clear') {
-      window.resetVis()
+      // window.resetVis()
       return
     }
 
@@ -467,7 +468,7 @@ ControlBox.prototype = {
 
   info: function(msg) {
     this.terminalOutput.append('div').classed('info', true).html(msg);
-    this._scrollToBottom();
+    // this._scrollToBottom();
   },
 
   error: function(msg) {
