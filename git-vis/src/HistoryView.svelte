@@ -14,6 +14,30 @@ const prefix = 'ExplainGit';
 onMount(() => {
   open2();
 
+  // Create a new zoom behavior
+  hv.zoom = d3.zoom()
+    .on("zoom", function(event) {
+      // Check if the viewBox attribute is set
+      if (!hv.svg.attr("viewBox")) {
+        // Set the viewBox attribute to the width and height of the SVG
+        hv.svg.attr("viewBox", "0 0 " + hv.svg.attr("width") + " " + hv.svg.attr("height"));
+      }
+      var viewBox = hv.svg.attr("viewBox").split(" ").map(Number);
+
+      // Update the viewBox values based on the zoom event
+      viewBox[0] = -event.transform.x / event.transform.k;
+      viewBox[1] = -event.transform.y / event.transform.k;
+      viewBox[2] = hv.svg.attr("width") / event.transform.k;
+      viewBox[3] = hv.svg.attr("height") / event.transform.k;
+
+      // Set the new viewBox values
+      hv.svg.attr("viewBox", viewBox.join(" "));
+    });
+
+  // Call the zoom behavior on the SVG element
+  var container = d3.select('.svg-container')
+  container.call(hv.zoom);
+
 });
 
 function copyDemo (demo) {

@@ -4,6 +4,7 @@ import { onMount } from 'svelte';
 import * as d3 from 'd3';
 import demos from './demos.mjs';
 import { historyView } from './store.js';
+import yargsParser from 'yargs-parser/browser';
 
 let hv;
 historyView.subscribe(value => { hv = value; });
@@ -71,17 +72,14 @@ const open = function(_args) {
 
 
 function yargs(str, opts) {
-//   var result = yargsParser(str, opts)
+  var result = yargsParser(str, opts)
   
-//   // make every value in result._ a string
-//   result._ = result._.map(function(val) {
-//     return "" + val
-//   })
+  // make every value in result._ a string
+  result._ = result._.map(function(val) {
+    return "" + val
+  })
 
-//   return result
-  return {
-    amend: false,
-  }
+  return result
 }
 
 /**
@@ -92,7 +90,7 @@ function ControlBox(config) {
   this.historyView = config.historyView;
   console.log("Moghter fucker: ", this.historyView);
   this.originView = config.originView;
-  this.initialMessage = config.initialMessage || 'Enter git commands below.';
+  this.initialMessage = config.initialMessage || '';
   this._commandHistory = [];
   this._currentCommand = -1;
   this._tempCommand = '';
@@ -1132,90 +1130,79 @@ ControlBox.prototype = {
 
 <pre id='last-command' style='display: none;'></pre>
 <div class="control-box" style="color: black;">
+  <style>
+  .control-box {
+    display: block;
+    /* position: absolute; */
+    top: 0px;
+    bottom: 0;
+    /* width: 250px; */
+    vertical-align: bottom;
+    border: 1px dotted #AAA;
+  }
+
+  .control-box select {
+  }
+
+  .control-box button {
+    /* font-family: Courier New; */
+    font-size: 12px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+
+  .control-box .log {
+    overflow-y: auto;
+    /* position: absolute; */
+    background: #cecece;
+    top: 30px;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    border-bottom: 1px solid #AAA;
+    text-align: left;
+  }
+
+  .control-box .log .reflog-entry, .control-box .log .log-entry {
+    display: inline-block;
+    padding-left: 15px;
+    text-indent: -15px;
+  }
+
+  .control-box .log, .control-box input[type="text"], .control-box .input {
+    /* font-family: Courier New; */
+    font-size: 14px;
+  }
+
+  .control-box .log .command-entry {
+    padding-left: 5px;
+    color: #FFF;
+    line-height: 14px;
+    /* background: url(../images/prompt.gif) no-repeat left top black; */
+  }
+
+  .control-box .log .info, .control-box .log .error {
+    font-size: 12px;
+    padding: 5px;
+  }
+
+  .control-box .log .info {
+    color: black;
+  }
+
+  .control-box .log .error {
+    color: black;
+  }
+
+  .control-box input[type="text"] {
+    width: 100%;
+    display: block;
+    border: none;
+    line-height: 14px;
+  }
+  </style>
+
   <select class="scenario-chooser"></select>
-  <input type="text" class="input" placeholder="enter git command">
+  <input type="text" class="input" placeholder="enter git command" />
   <div class="log"></div>
 </div>
-
-
-<style>
-.control-box {
-  display: block;
-  /* position: absolute; */
-  top: 0px;
-  bottom: 0;
-  /* width: 250px; */
-  vertical-align: bottom;
-  border: 1px dotted #AAA;
-}
-
-.control-box select {
-  position: absolute;
-  left: 3px;
-  top: 3px;
-}
-
-.control-box button {
-  font-family: Courier New;
-  font-size: 12px;
-  margin-right: 5px;
-  margin-bottom: 5px;
-}
-
-.control-box .log {
-  overflow-y: auto;
-  /* position: absolute; */
-  background: #000;
-  top: 30px;
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  border-bottom: 1px solid #AAA;
-}
-
-.control-box .log .reflog-entry, .control-box .log .log-entry {
-  display: inline-block;
-  padding-left: 15px;
-  text-indent: -15px;
-}
-
-.control-box .log, .control-box input[type="text"], .control-box .input {
-  font-family: Courier New;
-  font-size: 14px;
-}
-
-.control-box .log .command-entry {
-  padding-left: 5px;
-  color: #FFF;
-  line-height: 14px;
-  /* background: url(../images/prompt.gif) no-repeat left top black; */
-}
-
-.control-box input[type="text"] {
-  /* position: absolute; */
-  bottom: 0;
-  /* padding-left: 15px; */
-  /* color: #FFF; */
-  line-height: 14px;
-  /* background: url(../images/prompt.gif) no-repeat left center black; */
-}
-
-.control-box .log .info, .control-box .log .error {
-  font-size: 12px;
-  padding: 5px;
-}
-
-.control-box .log .info {
-  color: #FFC;
-}
-
-.control-box .log .error {
-  color: #FCC;
-}
-
-.control-box input[type="text"] {
-  width: 100%;
-  display: block;
-  border: none;
-}
-</style>

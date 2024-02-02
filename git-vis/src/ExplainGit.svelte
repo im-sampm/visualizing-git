@@ -181,7 +181,7 @@ const explainGit = {
 };
 </script>
 
-<Tabs id="ExplainGitZen-Container" class="p-8">
+<Tabs id="ExplainGitZen-Container">
     <TabItem open title="Playground">
       <div class="playground-container">
         <HistoryView />
