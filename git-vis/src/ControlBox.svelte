@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import { onMount } from 'svelte';
 // import yargsParser from 'https://unpkg.com/yargs-parser@19.0.0/browser.js'
 import * as d3 from 'd3';
@@ -10,6 +10,9 @@ let hv;
 historyView.subscribe(value => { hv = value; });
 
 const prefix = 'ExplainGit';
+
+  let selectedDemo = window.location.hash.slice(1); // remove the '#' from the hash
+
 
 onMount(() => {
   open2();
@@ -106,7 +109,7 @@ function ControlBox(config) {
     pointer: 0,
     stack: [
       {
-        // hv: this.historyView.serialize(),
+        hv: this.historyView.serialize(),
         // ov: this.originView && this.originView.serialize()
       }
     ]
@@ -114,8 +117,8 @@ function ControlBox(config) {
 
   this.mode = 'local'
 
-  // this.historyView.on('lock', this.lock.bind(this))
-  // this.historyView.on('unlock', this.unlock.bind(this))
+  this.historyView.on('lock', this.lock.bind(this))
+  this.historyView.on('unlock', this.unlock.bind(this))
 }
 
 ControlBox.prototype = {
@@ -175,54 +178,34 @@ ControlBox.prototype = {
   },
 
   render: function() {
-    var cBox = this,
-      cBoxContainer, log, input, selector;
-
-    cBoxContainer = d3.select('.control-box');
-    selector = d3.select('.scenario-chooser');
-
-    demos.forEach(function (demo) {
-      var opt = selector.append('option')
-        .text(demo.title)
-        .attr('value', demo.key)
-      if (window.location.hash === ('#' + demo.key)) {
-        opt.attr('selected', 'selected')
-      }
-    })
+    let selector = d3.select('.scenario-chooser');
 
     selector.on('change', function (e) {
+      let sel = selector.node() as HTMLSelectElement;
       if (!confirm('This will erase your current progress. Continue?')) {
         e.preventDefault()
         e.stopPropagation()
-        selector.node().value = window.location.hash.replace(/^#/, '') || demos[0].key
+        sel.value = window.location.hash.replace(/^#/, '') || demos[0].key
         return false
       }
       var currentDemo = window.location.hash
-      var sel = selector.node()
       var newDemo = sel.options[sel.selectedIndex].value
       if (('#' + newDemo) !== currentDemo) {
         window.location.hash = newDemo
       }
     })
 
-    input = d3.select('input.input');
-
-    log = d3.select('div.log');
-    console.log("Log: ", log);
-    log.on('click', function (e) {
-      if (e.target === log.node()) {
-        input.node().focus()
-      }
-    })
-
+    // Focus on the input box on page load
+    let input: any = d3.select('input.input');
     setTimeout(function() {
-      input.node().focus()
+      (input.node() as HTMLInputElement).focus()
     })
 
+    let cBox = this;
     input.on('keyup', function(e) {
       switch (e.keyCode) {
         case 13:
-          if (this.value.trim() === '' || cBox.locked) {
+            if ((this as HTMLInputElement).value.trim() === '' || cBox.locked) {
             return;
           }
 
@@ -262,11 +245,10 @@ ControlBox.prototype = {
         default:
           document.getElementById('last-command').textContent = document.querySelectorAll(".control-box .input")[0].textContent;
       }
-
     });
 
-    this.container = cBoxContainer;
-    this.terminalOutput = log;
+    this.container = d3.select('.control-box');
+    this.terminalOutput = d3.select('div.log');
     this.input = input;
 
     this.info(this.initialMessage);
@@ -337,7 +319,7 @@ ControlBox.prototype = {
     }
 
     if (entry.toLowerCase() === 'undo') {
-      var lastId = this.undoHistory.pointer - 1
+      var lastId: number = this.undoHistory.pointer - 1
       var lastState = this.undoHistory.stack[lastId]
       if (lastState) {
         this.historyView.deserialize(lastState.hv)
@@ -355,7 +337,7 @@ ControlBox.prototype = {
     }
 
     if (entry.toLowerCase() === 'redo') {
-      var lastId = this.undoHistory.pointer + 1
+      var lastId: number = this.undoHistory.pointer + 1
       var lastState = this.undoHistory.stack[lastId]
       if (lastState) {
         this.historyView.deserialize(lastState.hv)
@@ -373,7 +355,6 @@ ControlBox.prototype = {
     }
 
     if (entry.toLowerCase() === 'replay') {
-
       var length = this.undoHistory.stack.length;
 
       for (let i = 0; i < length; i++) {
@@ -403,14 +384,12 @@ ControlBox.prototype = {
       return;
     }
 
-
     if (entry.toLowerCase() === 'clear') {
       // window.resetVis()
       return
     }
 
     if (entry.toLowerCase() === 'save-script') {
-
       var script =  {
         title: "title",
         key: "title",
@@ -428,9 +407,7 @@ ControlBox.prototype = {
       a.href = url;
       a.download = 'gitvis-script.txt';
       document.body.appendChild(a);
-
       a.click();
-
       document.body.removeChild(a);
 
       return;
@@ -438,7 +415,7 @@ ControlBox.prototype = {
 
     if (entry.toLowerCase() === 'save-svg') {
       // Get the SVG element
-      var svg = document.querySelector('svg#ExplainGitZen');
+      var svg: SVGGElement = document.querySelector('svg#ExplainGitZen');
 
       // Store the original attributes
       var originalWidth = svg.getAttribute('width');
@@ -447,7 +424,7 @@ ControlBox.prototype = {
       var originalPreserveAspectRatio = svg.getAttribute('preserveAspectRatio');
 
       // Get the two top-level child text elements
-      var textElements = svg.querySelectorAll(':scope > text:nth-child(-n+2)');
+      let textElements: NodeListOf<SVGTextElement> = svg.querySelectorAll(':scope > text:nth-child(-n+2)');
 
       // Hide the text elements
       textElements.forEach(function(textElement) {
@@ -458,8 +435,8 @@ ControlBox.prototype = {
       var bbox = svg.getBBox();
 
       // Set the width, height, viewBox, and preserveAspectRatio attributes of the SVG element
-      svg.setAttribute('width', bbox.width);
-      svg.setAttribute('height', bbox.height);
+      svg.setAttribute('width', String(bbox.width));
+      svg.setAttribute('height', String(bbox.height));
       svg.setAttribute('viewBox', bbox.x + ' ' + bbox.y + ' ' + bbox.width + ' ' + bbox.height);
 
       // Clone the marker definitions
@@ -528,7 +505,7 @@ ControlBox.prototype = {
       args = split.slice(2),
       argsStr = args.join(' ')
 
-    var options = yargs(argsStr)
+    var options = yargs(argsStr, [])
 
     try {
       if (typeof this[method] === 'function') {
@@ -546,7 +523,7 @@ ControlBox.prototype = {
 
   info: function(msg) {
     this.terminalOutput.append('div').classed('info', true).html(msg);
-    // this._scrollToBottom();
+    this._scrollToBottom();
   },
 
   error: function(msg) {
@@ -1202,7 +1179,11 @@ ControlBox.prototype = {
   }
   </style>
 
-  <select class="scenario-chooser"></select>
+  <select class="scenario-chooser" bind:value={selectedDemo}>
+    {#each demos as demo}
+      <option value={demo.key}>{demo.title}</option>
+    {/each}
+  </select>
   <input type="text" class="input" placeholder="enter git command" />
   <div class="log"></div>
 </div>

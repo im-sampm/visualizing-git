@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import { onMount } from 'svelte';
 import HistoryView from './HistoryView.svelte';
 import ControlBox from './ControlBox.svelte';
@@ -6,6 +6,9 @@ import * as d3 from 'd3';
 import { Tabs, TabItem } from 'flowbite-svelte';
 import demos from './demos.mjs';
 import { lastDemo } from './store.js';
+
+let ld;
+lastDemo.subscribe(value => { ld = value; });
 
 const prefix = 'ExplainGit';
 let openSandBoxes = [];
@@ -50,9 +53,9 @@ onMount(() => {
   console.log(" farts");
 
   window.onhashchange = function () {
+    console.log("HASH CHANGE")
     var demo = findDemo(demos, cleanHash(window.location.hash)) || lastDemo
     if (demo) {
-      // lastDemo = demo
       lastDemo.set(demo);
       document.getElementById('last-command').textContent = ""
       clean()
@@ -61,11 +64,10 @@ onMount(() => {
   }
 
   lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
-  // open()
 });
 
 function open2() {
-  reset();
+  // reset();
 
   var savedState = null
   if (window.localStorage) {
@@ -75,7 +77,7 @@ function open2() {
   var initial = Object.assign(copyDemo(lastDemo), {
     name: 'Zen',
     height: '100%',
-    initialMessage: lastDemo.message,
+    initialMessage: ld.message,
     undoHistory: savedState,
     hvSavedState: savedState && savedState.stack[savedState.pointer].hv,
     ovSavedState: savedState && savedState.stack[savedState.pointer].ov
@@ -84,22 +86,19 @@ function open2() {
   open(initial);
 }
 
-
 open = function(_args) {
-  var args = Object.create(_args),
-    name = prefix + args.name,
-    containerId = name + '-Container',
-    container = d3.select('#' + containerId),
-    playground = container.select('.playground-container'),
-    historyView, originView = null,
-    controlBox;
+  // var args = Object.create(_args),
+  //   name = prefix + args.name,
+  //   containerId = name + '-Container',
+  //   container = d3.select('#' + containerId),
+  //   playground = container.select('.playground-container'),
+  //   historyView, originView = null,
+  //   controlBox;
 
-  container.style('display', 'block');
+  // container.style('display', 'block');
 
-  args.name = name;
-  args.savedState = args.hvSavedState;
-  // historyView = new HistoryView(args);
-  // window.hv = historyView;
+  // args.name = name;
+  // args.savedState = args.hvSavedState;
 
   // if (args.originData) {
   //   originView = new HistoryView({
@@ -124,34 +123,6 @@ open = function(_args) {
   // });
   // window.cb = controlBox;
 
-  // console.log("playground", playground.attr("id"));
-
-  // controlBox.render(playground);
-  // historyView.render(playground);
-
-  // Create a new zoom behavior
-  // historyView.zoom = d3.zoom()
-  //   .on("zoom", function(event) {
-  //     // Check if the viewBox attribute is set
-  //     if (!historyView.svg.attr("viewBox")) {
-  //       // Set the viewBox attribute to the width and height of the SVG
-  //       historyView.svg.attr("viewBox", "0 0 " + historyView.svg.attr("width") + " " + historyView.svg.attr("height"));
-  //     }
-  //     var viewBox = historyView.svg.attr("viewBox").split(" ").map(Number);
-
-  //     // Update the viewBox values based on the zoom event
-  //     viewBox[0] = -event.transform.x / event.transform.k;
-  //     viewBox[1] = -event.transform.y / event.transform.k;
-  //     viewBox[2] = historyView.svg.attr("width") / event.transform.k;
-  //     viewBox[3] = historyView.svg.attr("height") / event.transform.k;
-
-  //     // Set the new viewBox values
-  //     historyView.svg.attr("viewBox", viewBox.join(" "));
-  //   });
-
-  // // Call the zoom behavior on the SVG element
-  // container.call(historyView.zoom);
-
   // openSandBoxes.push({
   //   hv: historyView,
   //   cb: controlBox,
@@ -171,14 +142,6 @@ reset = function() {
   console.log(d3);
   d3.selectAll('a.openswitch').classed('selected', false);
 };
-
-const explainGit = {
-  HistoryView: HistoryView,
-  ControlBox: ControlBox,
-  generateId: HistoryView.generateId,
-  open: open,
-  reset: reset
-};
 </script>
 
 <Tabs id="ExplainGitZen-Container">
@@ -186,14 +149,6 @@ const explainGit = {
       <div class="playground-container">
         <HistoryView />
         <ControlBox />
-        <!-- <div class="svg-container">
-          <select class="scenario-chooser"></select>
-        </div>
-        <pre id='last-command' style='display: none;'></pre>
-        <div class="control-box">
-          <input type="text" class="input" placeholder="enter git command">
-          <div class="log"></div>
-        </div> -->
       </div>
     </TabItem>
 </Tabs>

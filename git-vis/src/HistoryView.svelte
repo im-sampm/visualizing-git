@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import { onMount } from 'svelte';
 import * as d3 from 'd3';
 import { lastDemo, historyView } from './store.js';
@@ -431,7 +431,8 @@ HistoryView.prototype = {
     }
 
     var parts = /^([^\^\~]+)(.*)$/.exec(ref),
-      ref = parts[1],
+      // FIXME: Figure out how to avoid casting ref as any
+      ref: any = parts[1],
       modifier = parts[2];
 
     if (ref === 'initial') {
@@ -569,7 +570,6 @@ HistoryView.prototype = {
     //   $(svgContainer).draggable();
     // }
 
-    // svg = svgContainer.append('svg:svg');
     svg = d3.select('.svg-container svg');
 
     svg.attr('id', this.name)
@@ -628,7 +628,7 @@ HistoryView.prototype = {
   },
 
   _resizeSvg: function() {
-    var ele = document.getElementById(this.svg.node().id);
+    var ele = this.svg.node();
     var container = ele.parentNode;
     var currentWidth = ele.offsetWidth;
     var newWidth;
