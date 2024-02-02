@@ -1,17 +1,18 @@
-import yargsParser from 'https://unpkg.com/yargs-parser@19.0.0/browser.js'
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+<script>
+// import yargsParser from 'https://unpkg.com/yargs-parser@19.0.0/browser.js'
+import * as d3 from 'd3';
 import demos from './demos.mjs';
 
 
 function yargs(str, opts) {
-  var result = yargsParser(str, opts)
+//   var result = yargsParser(str, opts)
   
-  // make every value in result._ a string
-  result._ = result._.map(function(val) {
-    return "" + val
-  })
+//   // make every value in result._ a string
+//   result._ = result._.map(function(val) {
+//     return "" + val
+//   })
 
-  return result
+//   return result
 }
 
 /**
@@ -1046,5 +1047,11 @@ ControlBox.prototype = {
     }
   }
 };
+</script>
 
-export { ControlBox };
+<pre id='last-command' style='display: none;'></pre>
+<div class="control-box">
+  <select class="scenario-chooser"></select>
+  <input type="text" class="input" placeholder="enter git command">
+  <div class="log"></div>
+</div>

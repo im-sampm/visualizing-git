@@ -1,4 +1,5 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+<script>
+import * as d3 from 'd3';
 
 var REG_MARKER_END = 'url(#triangle)',
   MERGE_MARKER_END = 'url(#brown-triangle)',
@@ -1430,5 +1431,7 @@ HistoryView.prototype = {
     }.bind(this), 1000)
   }
 };
+</script>
 
-export { HistoryView };
+<div class="svg-container">
+</div>

@@ -1,20 +1,6 @@
 <script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
-
-  import { Alert } from 'flowbite-svelte';
-
-  import { Drawer, Button, CloseButton } from 'flowbite-svelte';
-  import { sineIn } from 'svelte/easing';
-  let hidden1 = true;
-  let transitionParams = {
-    x: -320,
-    duration: 200,
-    easing: sineIn
-  };
-  import { explainGit } from '../public/js/explaingit.mjs';
-  import demos from '../public/js/demos.mjs';
+  import demos from './demos.mjs';
+  import ExplainGit from './ExplainGit.svelte';
 
   function ready(fn) {
     if (document.readyState != 'loading'){
@@ -106,18 +92,7 @@
 
 <main>
 
-  <div id="ExplainGitZen-Container" style="display:none">
-      <div class="playground-container">
-        <div class="svg-container">
-          <select class="scenario-chooser"></select>
-        </div>
-        <pre id='last-command' style='display: none;'></pre>
-        <div class="control-box">
-          <input type="text" class="input" placeholder="enter git command">
-          <div class="log"></div>
-        </div>
-      </div>
-  </div>
+  <ExplainGit />
 
 </main>
 

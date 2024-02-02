@@ -1,6 +1,7 @@
-import { HistoryView } from './historyview.mjs';
-import { ControlBox } from './controlbox.mjs';
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+<script>
+import HistoryView from './HistoryView.svelte';
+import ControlBox from './ControlBox.svelte';
+import * as d3 from 'd3';
 
 const prefix = 'ExplainGit';
 let openSandBoxes = [];
@@ -101,7 +102,19 @@ const explainGit = {
   open: open,
   reset: reset
 };
+</script>
 
-window.explainGit = explainGit;
-
-export { explainGit };
+<div id="ExplainGitZen-Container" style="display:none">
+    <div class="playground-container">
+      <ControlBox />
+      <HistoryView />
+      <!-- <div class="svg-container">
+        <select class="scenario-chooser"></select>
+      </div>
+      <pre id='last-command' style='display: none;'></pre>
+      <div class="control-box">
+        <input type="text" class="input" placeholder="enter git command">
+        <div class="log"></div>
+      </div> -->
+    </div>
+</div>
