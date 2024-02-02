@@ -1136,3 +1136,86 @@ ControlBox.prototype = {
   <input type="text" class="input" placeholder="enter git command">
   <div class="log"></div>
 </div>
+
+
+<style>
+.control-box {
+  display: block;
+  /* position: absolute; */
+  top: 0px;
+  bottom: 0;
+  /* width: 250px; */
+  vertical-align: bottom;
+  border: 1px dotted #AAA;
+}
+
+.control-box select {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+}
+
+.control-box button {
+  font-family: Courier New;
+  font-size: 12px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+.control-box .log {
+  overflow-y: auto;
+  /* position: absolute; */
+  background: #000;
+  top: 30px;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  border-bottom: 1px solid #AAA;
+}
+
+.control-box .log .reflog-entry, .control-box .log .log-entry {
+  display: inline-block;
+  padding-left: 15px;
+  text-indent: -15px;
+}
+
+.control-box .log, .control-box input[type="text"], .control-box .input {
+  font-family: Courier New;
+  font-size: 14px;
+}
+
+.control-box .log .command-entry {
+  padding-left: 5px;
+  color: #FFF;
+  line-height: 14px;
+  /* background: url(../images/prompt.gif) no-repeat left top black; */
+}
+
+.control-box input[type="text"] {
+  /* position: absolute; */
+  bottom: 0;
+  /* padding-left: 15px; */
+  /* color: #FFF; */
+  line-height: 14px;
+  /* background: url(../images/prompt.gif) no-repeat left center black; */
+}
+
+.control-box .log .info, .control-box .log .error {
+  font-size: 12px;
+  padding: 5px;
+}
+
+.control-box .log .info {
+  color: #FFC;
+}
+
+.control-box .log .error {
+  color: #FCC;
+}
+
+.control-box input[type="text"] {
+  width: 100%;
+  display: block;
+  border: none;
+}
+</style>

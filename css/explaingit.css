@@ -89,7 +89,7 @@ span.cmd {
   float: right;
 }
 
-#ExplainGitZen-Container .svg-container {
+/* #ExplainGitZen-Container .svg-container {
   display: block;
   border: 1px dotted #AAA;
   height: 100%;
@@ -111,7 +111,7 @@ span.cmd {
   border-left: 1px dotted #AAA;
   border-bottom: 1px dotted #AAA;
   min-height: 400px;
-}
+} */
 
 #ExplainGitZen-Container .playground-container {
   position: absolute;

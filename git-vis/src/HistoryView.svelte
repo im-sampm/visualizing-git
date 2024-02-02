@@ -545,7 +545,8 @@ HistoryView.prototype = {
     //   $(svgContainer).draggable();
     // }
 
-    svg = svgContainer.append('svg:svg');
+    // svg = svgContainer.append('svg:svg');
+    svg = d3.select('.svg-container svg');
 
     svg.attr('id', this.name)
       .attr('width', this.width)
@@ -1493,5 +1494,174 @@ HistoryView.prototype = {
 };
 </script>
 
-<div class="svg-container" style="background-color: white; height: 400px;">
+<div class="svg-container">
+  <style>
+  .svg-container {
+    display: block;
+    border: 1px dotted #AAA;
+    height: 400px;
+    /* position: absolute; */
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 250px;
+    margin-left: 0;
+  }
+
+  .svg-container.remote-container {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    left: auto;
+    bottom: auto;
+    background-color: #EFF1FF;
+    border-left: 1px dotted #AAA;
+    border-bottom: 1px dotted #AAA;
+    min-height: 400px;
+  }
+  circle.commit {
+    fill: #CCCCCC;
+    stroke: #888888;
+    stroke-width: 1;
+    transition-property: stroke, fill;
+    transition-duration: 500ms;
+    transition-timing-function: ease-out;
+  }
+
+  circle.commit.reverted {
+    fill: #CCEEFF;
+    stroke: #0066CC;
+  }
+
+  circle.commit.reverted.checked-out {
+    fill: #CCEEFF;
+  }
+
+  circle.commit.rebased {
+    stroke: #560066;
+    fill: #b907a4;
+  }
+
+  circle.commit.rebased.checked-out {
+    fill: #CCCCFF;
+  }
+
+  circle.commit.cherry-picked {
+    stroke: #660000;
+    fill: #ff5151;
+  }
+
+  circle.commit.cherry-picked.checked-out {
+    fill: #ff5151;
+  }
+
+  circle.commit.branchless {
+    fill: #FEFEFE;
+    stroke: #888888;
+    stroke-dasharray: 5, 5;
+  }
+
+  circle.commit.branchless.checked-out {
+    fill: #FEFEFE;
+  }
+
+  circle.commit.checked-out {
+    fill: #8ce08c;
+    stroke: #339900;
+  }
+
+  circle.commit.logging {
+    stroke: #0066CC;
+    fill: #0099EE;
+  }
+
+  .commit-pointer {
+    stroke: rgba(100, 100, 100, 1);
+    stroke-width: 2;
+  }
+
+  .merge-pointer {
+    stroke: rgba(204, 29, 29, 0.5);
+    stroke-width: 2;
+    stroke-dasharray: 5, 3;
+  }
+
+  .commit-pointer.branchless, .merge-pointer.branchless {
+    stroke: #DDD;
+    stroke-width: 2;
+  }
+
+  text.id-label {
+    text-anchor: middle;
+    font-family: Courier New;
+    font-weight: bolder;
+    fill: #666;
+    font-size: 10px;
+  }
+
+  text.message-label {
+    text-anchor: middle;
+    font-family: Courier New;
+    fill: #666;
+    font-size: 10px;
+  }
+
+  g.branch-tag > rect {
+    fill: #FFCC66;
+    /* stroke: #CC9900; */
+    /* stroke-width: 2; */
+  }
+
+  g.branch-tag.git-tag > rect {
+    fill: #7FC9FF;
+    /* stroke: #0026FF; */
+  }
+
+  g.branch-tag.remote-branch > rect {
+    fill: #CCC;
+    stroke: #888;
+  }
+
+  g.branch-tag > text {
+    text-anchor: middle;
+    fill: #000;
+    font-size: 15px;
+    font-family: Arial;
+  }
+
+  g.head-tag > rect {
+    fill: #CCFFCC;
+    /* stroke: #339900; */
+    /* stroke-width: 2; */
+  }
+
+  g.head-tag > text {
+    text-anchor: middle;
+    fill: #000;
+    font-size: 15px;
+    font-family: Arial;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  </style>
+  <svg>
+    <marker id="triangle" refX="5" refY="5" markerUnits="strokeWidth" fill="rgba(100,100,100,1)"
+            markerWidth="4" markerHeight="3" orient="auto-start-reverse" viewBox="0 0 10 10">
+        <path d="M 0 0 L 10 5 L 0 10 z"/>
+    </marker>
+    <marker id="red-triangle" refX="5" refY="5" markerUnits="strokeWidth" fill="rgba(204,29,29,0.5)"
+            markerWidth="4" markerHeight="3" orient="auto-start-reverse" viewBox="0 0 10 10">
+        <path d="M 0 0 L 10 5 L 0 10 z"/>
+    </marker>
+    <marker id="faded-triangle" refX="5" refY="5" markerUnits="strokeWidth" fill="#DDD"
+            markerWidth="4" markerHeight="3" orient="auto-start-reverse" viewBox="0 0 10 10">
+        <path d="M 0 0 L 10 5 L 0 10 z"/>
+    </marker>
+    <marker id="brown-triangle" refX="5" refY="5" markerUnits="strokeWidth" fill="rgba(100,100,100,1)"
+            markerWidth="4" markerHeight="3" orient="auto-start-reverse" viewBox="0 0 10 10">
+        <path d="M 0 0 L 10 5 L 0 10 z"/>
+    </marker>
+
+  </svg>
 </div>
