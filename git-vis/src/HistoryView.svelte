@@ -1,6 +1,53 @@
 <script>
+import { onMount } from 'svelte';
 import * as d3 from 'd3';
+import { lastDemo } from './store.js';
 
+let demo2;
+lastDemo.subscribe(value => { demo2 = value; });
+
+const prefix = 'ExplainGit';
+
+onMount(() => {
+  open2();
+
+});
+
+function copyDemo (demo) {
+  // make a deep copy
+  return JSON.parse(JSON.stringify(demo))
+}
+
+function open2() {
+
+  var initial = Object.assign(copyDemo(demo2), {
+    name: 'Zen',
+    height: '100%',
+  });
+
+  open(initial);
+}
+
+const open = function(_args) {
+  var args = Object.create(_args),
+    name = prefix + args.name,
+    containerId = name + '-Container',
+    container = d3.select('#' + containerId),
+    playground = container.select('.playground-container'),
+    historyView, originView = null,
+    controlBox;
+
+  container.style('display', 'block');
+
+  args.name = name;
+  args.savedState = args.hvSavedState;
+  historyView = new HistoryView(args);
+
+  historyView.render(playground);
+  console.log("HistoryView initialized");
+  // window.hv = historyView;
+}
+ 
 var REG_MARKER_END = 'url(#triangle)',
   MERGE_MARKER_END = 'url(#brown-triangle)',
   FADED_MARKER_END = 'url(#faded-triangle)',
@@ -249,6 +296,13 @@ function HistoryView(config) {
       this.deserialize(config.savedState)
     }.bind(this))
   }
+
+  this.svgContainer = null;
+  this.svg = null;
+  this.arrowBox = null;
+  this.commitBox = null;
+  this.tagBox = null;
+
 }
 
 HistoryView.generateId = function() {
@@ -329,6 +383,7 @@ HistoryView.prototype = {
    * @return {Object} the commit datum object
    */
   getCommit: function getCommit(ref) {
+    console.log("CommitData: ", this.commitData);
     // Optimization, doesn't seem to break anything
     if (!ref) return null;
     if (ref.id) return ref
@@ -479,6 +534,7 @@ HistoryView.prototype = {
    */
   render: function(container) {
     var svgContainer, svg;
+    console.log("poo: ", container);
 
     svgContainer = container.select('.svg-container');
 
@@ -1197,6 +1253,7 @@ HistoryView.prototype = {
   },
 
   checkout: function(ref) {
+    console.log("Ref: " + ref)
     var commit = this.getCommit(ref);
 
     if (!commit) {

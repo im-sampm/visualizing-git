@@ -36,6 +36,7 @@ function open2() {
   })
 
   open(initial);
+  console.log("initial: ", initial);
 }
 
 
@@ -61,6 +62,8 @@ const open = function(_args) {
   });
 
   controlBox.render(playground);
+
+  console.log("ControlBox initialized");
 }
 
 

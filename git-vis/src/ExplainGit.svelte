@@ -4,6 +4,7 @@ import HistoryView from './HistoryView.svelte';
 import ControlBox from './ControlBox.svelte';
 import * as d3 from 'd3';
 import demos from './demos.mjs';
+import { lastDemo } from './store.js';
 
 const prefix = 'ExplainGit';
 let openSandBoxes = [];
@@ -41,7 +42,8 @@ function copyDemo (demo) {
   return JSON.parse(JSON.stringify(demo))
 }
 
-let lastDemo = findDemo(demos, cleanHash(window.location.hash)) || demos[0]
+// let lastDemo = findDemo(demos, cleanHash(window.location.hash)) || demos[0]
+lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
 
 onMount(() => {
   console.log(" farts");
@@ -49,13 +51,15 @@ onMount(() => {
   window.onhashchange = function () {
     var demo = findDemo(demos, cleanHash(window.location.hash)) || lastDemo
     if (demo) {
-      lastDemo = demo
+      // lastDemo = demo
+      lastDemo.set(demo);
       document.getElementById('last-command').textContent = ""
       clean()
       open2()
     }
   }
 
+  lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
   // open()
 });
 
