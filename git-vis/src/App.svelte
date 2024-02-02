@@ -1,81 +1,83 @@
 <script>
+  import { onMount } from 'svelte';
   import demos from './demos.mjs';
   import ExplainGit from './ExplainGit.svelte';
 
-  function ready(fn) {
-    if (document.readyState != 'loading'){
-      fn();
-    } else {
-      document.addEventListener('DOMContentLoaded', fn);
-    }
-  }
+  // function ready(fn) {
+  //   if (document.readyState != 'loading'){
+  //     fn();
+  //   } else {
+  //     document.addEventListener('DOMContentLoaded', fn);
+  //   }
+  // }
 
-  function clearSavedState () {
-    if (window.localStorage) {
-      window.localStorage.removeItem('git-viz-snapshot')
-    }
-  }
+  // function clearSavedState () {
+  //   if (window.localStorage) {
+  //     window.localStorage.removeItem('git-viz-snapshot')
+  //   }
+  // }
 
-  function cleanupDom () {
-    // $('.svg-container.remote-container').remove()
-  }
+  // function cleanupDom () {
+  //   // $('.svg-container.remote-container').remove()
+  // }
 
-  function clean () {
-    clearSavedState()
-    cleanupDom()
-  }
+  // function clean () {
+  //   clearSavedState()
+  //   cleanupDom()
+  // }
 
-  function cleanHash (hash) {
-    return hash.replace(/^#/, '')
-  }
+  // function cleanHash (hash) {
+  //   return hash.replace(/^#/, '')
+  // }
 
-  function findDemo (demos, name) {
-    return demos.filter(function (d) {
-      return d.key === name
-    })[0]
-  }
+  // function findDemo (demos, name) {
+  //   return demos.filter(function (d) {
+  //     return d.key === name
+  //   })[0]
+  // }
 
-  function copyDemo (demo) {
-    // make a deep copy
-    return JSON.parse(JSON.stringify(demo))
-  }
+  // function copyDemo (demo) {
+  //   // make a deep copy
+  //   return JSON.parse(JSON.stringify(demo))
+  // }
 
-  var lastDemo = findDemo(demos, cleanHash(window.location.hash)) || demos[0]
+  // let lastDemo = findDemo(demos, cleanHash(window.location.hash)) || demos[0]
 
-  ready(function () {
-    console.log("fart");
-    window.onhashchange = function () {
-      var demo = findDemo(demos, cleanHash(window.location.hash)) || lastDemo
-      if (demo) {
-        lastDemo = demo
-        document.getElementById('last-command').textContent = ""
-        clean()
-        open()
-      }
-    }
+  // onMount(() => {
+  //   console.log(" farts");
 
-    open()
-  })
+  //   window.onhashchange = function () {
+  //     var demo = findDemo(demos, cleanHash(window.location.hash)) || lastDemo
+  //     if (demo) {
+  //       lastDemo = demo
+  //       document.getElementById('last-command').textContent = ""
+  //       clean()
+  //       open()
+  //     }
+  //   }
 
-  function open() {
-    explainGit.reset();
+  //   // open()
+  // });
 
-    var savedState = null
-    if (window.localStorage) {
-      savedState = JSON.parse(window.localStorage.getItem('git-viz-snapshot') || 'null')
-    }
+  // function open() {
+  //   // explainGit.reset();
 
-    var initial = Object.assign(copyDemo(lastDemo), {
-      name: 'Zen',
-      height: '100%',
-      initialMessage: lastDemo.message,
-      undoHistory: savedState,
-      hvSavedState: savedState && savedState.stack[savedState.pointer].hv,
-      ovSavedState: savedState && savedState.stack[savedState.pointer].ov
-    })
+  //   var savedState = null
+  //   if (window.localStorage) {
+  //     savedState = JSON.parse(window.localStorage.getItem('git-viz-snapshot') || 'null')
+  //   }
 
-    explainGit.open(initial);
-  }
+  //   var initial = Object.assign(copyDemo(lastDemo), {
+  //     name: 'Zen',
+  //     height: '100%',
+  //     initialMessage: lastDemo.message,
+  //     undoHistory: savedState,
+  //     hvSavedState: savedState && savedState.stack[savedState.pointer].hv,
+  //     ovSavedState: savedState && savedState.stack[savedState.pointer].ov
+  //   })
+
+  //   // explainGit.open(initial);
+  // }
 
   // window.resetVis = function () {
   //   if (confirm('This will reset your visualization. Are you sure?')) {
