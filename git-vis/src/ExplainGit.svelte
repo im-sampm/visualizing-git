@@ -182,8 +182,8 @@ const explainGit = {
 
 <div id="ExplainGitZen-Container" style="display:none">
     <div class="playground-container">
-      <ControlBox />
       <HistoryView />
+      <ControlBox />
       <!-- <div class="svg-container">
         <select class="scenario-chooser"></select>
       </div>

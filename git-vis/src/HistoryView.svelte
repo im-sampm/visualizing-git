@@ -1,10 +1,13 @@
 <script>
 import { onMount } from 'svelte';
 import * as d3 from 'd3';
-import { lastDemo } from './store.js';
+import { lastDemo, historyView } from './store.js';
 
 let demo2;
 lastDemo.subscribe(value => { demo2 = value; });
+
+let hv;
+historyView.subscribe(value => { hv = value; });
 
 const prefix = 'ExplainGit';
 
@@ -34,16 +37,18 @@ const open = function(_args) {
     containerId = name + '-Container',
     container = d3.select('#' + containerId),
     playground = container.select('.playground-container'),
-    historyView, originView = null,
+    originView = null,
     controlBox;
 
   container.style('display', 'block');
 
   args.name = name;
   args.savedState = args.hvSavedState;
-  historyView = new HistoryView(args);
+  historyView.set(new HistoryView(args));
 
-  historyView.render(playground);
+  console.log("og historyView: ", hv);
+
+  hv.render(playground);
   console.log("HistoryView initialized");
   // window.hv = historyView;
 }

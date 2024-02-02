@@ -3,6 +3,10 @@ import { onMount } from 'svelte';
 // import yargsParser from 'https://unpkg.com/yargs-parser@19.0.0/browser.js'
 import * as d3 from 'd3';
 import demos from './demos.mjs';
+import { historyView } from './store.js';
+
+let hv;
+historyView.subscribe(value => { hv = value; });
 
 const prefix = 'ExplainGit';
 
@@ -46,7 +50,7 @@ const open = function(_args) {
     containerId = name + '-Container',
     container = d3.select('#' + containerId),
     playground = container.select('.playground-container'),
-    historyView, originView = null,
+    originView = null,
     controlBox;
 
   container.style('display', 'block');
@@ -55,7 +59,7 @@ const open = function(_args) {
   args.savedState = args.hvSavedState;
 
   controlBox = new ControlBox({
-    historyView: null,
+    historyView: hv,
     originView: null,
     initialMessage: args.initialMessage,
     undoHistory: args.undoHistory
@@ -76,6 +80,9 @@ function yargs(str, opts) {
 //   })
 
 //   return result
+  return {
+    amend: false,
+  }
 }
 
 /**
@@ -84,6 +91,7 @@ function yargs(str, opts) {
  */
 function ControlBox(config) {
   this.historyView = config.historyView;
+  console.log("Moghter fucker: ", this.historyView);
   this.originView = config.originView;
   this.initialMessage = config.initialMessage || 'Enter git commands below.';
   this._commandHistory = [];
@@ -146,6 +154,9 @@ ControlBox.prototype = {
   },
 
   getRepoView: function () {
+    console.log("historyView: ", this.historyView);
+    console.log("originView: ", this.originView);
+    console.log("mode: ", this.mode);
     if (this.mode === 'local') {
       return this.historyView
     } else if (this.mode === 'origin') {
@@ -571,6 +582,8 @@ ControlBox.prototype = {
       boolean: ['amend'],
       string: ['m']
     })
+    console.log("ARRRG: ", cmdStr);
+    console.log("OPPTS: ", opts);
     var msg = ""
     this.transact(function() {
       if (opts.amend) {
