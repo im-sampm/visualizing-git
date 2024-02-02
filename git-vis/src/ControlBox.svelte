@@ -1,22 +1,16 @@
 <script lang="ts">
 import { onMount } from 'svelte';
-// import yargsParser from 'https://unpkg.com/yargs-parser@19.0.0/browser.js'
 import * as d3 from 'd3';
-import demos from './demos.mjs';
-import { historyView } from './store.js';
 import yargsParser from 'yargs-parser/browser';
+
+import { historyView } from './store.js';
+import demos from './demos.mjs';
 
 let hv;
 historyView.subscribe(value => { hv = value; });
 
-const prefix = 'ExplainGit';
-
-  let selectedDemo = window.location.hash.slice(1); // remove the '#' from the hash
-
-
-onMount(() => {
-  open2();
-});
+let selectedDemo = window.location.hash.slice(1); // remove the '#' from the hash
+let lastDemo = findDemo(demos, cleanHash(window.location.hash)) || demos[0]
 
 function cleanHash (hash) {
   return hash.replace(/^#/, '')
@@ -29,13 +23,14 @@ function findDemo (demos, name) {
 }
 
 function copyDemo (demo) {
-  // make a deep copy
   return JSON.parse(JSON.stringify(demo))
 }
 
-export let lastDemo = findDemo(demos, cleanHash(window.location.hash)) || demos[0]
+onMount(() => {
+  open();
+});
 
-function open2() {
+function open() {
 
   var initial = Object.assign(copyDemo(lastDemo), {
     name: 'Zen',
@@ -43,13 +38,9 @@ function open2() {
     initialMessage: "",
   })
 
-  open(initial);
-  console.log("initial: ", initial);
-}
+  const prefix = 'ExplainGit';
 
-
-const open = function(_args) {
-  var args = Object.create(_args),
+  var args = Object.create(initial),
     name = prefix + args.name,
     containerId = name + '-Container',
     container = d3.select('#' + containerId),
@@ -243,6 +234,7 @@ ControlBox.prototype = {
           e.stopImmediatePropagation();
           break;
         default:
+          // FIXME: Refactor this into a store, if it's really necessary
           document.getElementById('last-command').textContent = document.querySelectorAll(".control-box .input")[0].textContent;
       }
     });
