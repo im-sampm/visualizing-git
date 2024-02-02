@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.0.1",
+    "@types/yargs-parser": "^21.0.3",
     "autoprefixer": "^10.4.16",
     "flowbite": "^2.2.1",
     "flowbite-svelte": "^0.44.22",
@@ -19,5 +20,9 @@
     "svelte": "^4.2.8",
     "tailwindcss": "^3.3.6",
     "vite": "^5.0.8"
+  },
+  "dependencies": {
+    "d3": "^7.8.5",
+    "yargs-parser": "^21.1.1"
   }
 }

@@ -1138,6 +1138,7 @@ ControlBox.prototype = {
     right: 0;
     border-bottom: 1px solid #AAA;
     text-align: left;
+    max-height: 100px;
   }
 
   .control-box .log .reflog-entry, .control-box .log .log-entry {
