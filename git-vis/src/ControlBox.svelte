@@ -3,59 +3,22 @@ import { onMount } from 'svelte';
 import * as d3 from 'd3';
 import yargsParser from 'yargs-parser/browser';
 
-import { lastDemo, historyView } from './store.js';
+import { historyView } from './store.js';
 import demos from './demos.mjs';
 
 let hv;
 historyView.subscribe(value => { hv = value; });
 
-let ld;
-lastDemo.subscribe(value => { ld = value; });
-lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
-
 let openSandBoxes = [];
-let selectedDemo = window.location.hash.slice(1); // remove the '#' from the hash
+export let selectedDemo;
 
-
-function clearSavedState () {
-  if (window.localStorage) {
-    window.localStorage.removeItem('git-viz-snapshot')
-  }
-}
-
-function cleanupDom () {
-  // $('.svg-container.remote-container').remove()
-}
-
-function clean () {
-  clearSavedState()
-  cleanupDom()
-}
-
-function cleanHash (hash) {
-  return hash.replace(/^#/, '')
-}
-
-function findDemo (demos, name) {
-  return demos.filter(function (d) {
-    return d.key === name
-  })[0]
-}
+// $: {
+//   console.log("Changed lastDemo: ", $selectedDemo);
+//   // open();
+// }
 
 onMount(() => {
-
-  window.onhashchange = function () {
-    var demo = findDemo(demos, cleanHash(window.location.hash)) || ld 
-    if (demo) {
-      lastDemo.set(demo);
-      // FIXME: Refactor this into a store, if it's really necessary
-      document.getElementById('last-command').textContent = ""
-      clean()
-      open()
-    }
-  }
-
-  lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
+  console.log("ControlBox: onMount: selectedDemo: ", selectedDemo)  
 
   setTimeout(() => {
     commandInput.focus();
@@ -123,19 +86,19 @@ function ControlBox(config) {
 
   this.terminalOutput = d3.select('div.log');
 
-  this.undoHistory = config.undoHistory || {
-    pointer: 0,
-    stack: [
-      {
-        hv: this.historyView.serialize(),
-        // ov: this.originView && this.originView.serialize()
-      }
-    ]
-  }
+  // this.undoHistory = config.undoHistory || {
+  //   pointer: 0,
+  //   stack: [
+  //     {
+  //       hv: this.historyView.serialize(),
+  //       // ov: this.originView && this.originView.serialize()
+  //     }
+  //   ]
+  // }
 
   this.info(this.initialMessage);
-  this.historyView.on('lock', this.lock.bind(this))
-  this.historyView.on('unlock', this.unlock.bind(this))
+  // this.historyView.on('lock', this.lock.bind(this))
+  // this.historyView.on('unlock', this.unlock.bind(this))
 }
 
 ControlBox.prototype = {

@@ -1,10 +1,11 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import * as d3 from 'd3';
+// import { lastDemo, historyView } from './store.js';
 import { lastDemo, historyView } from './store.js';
 
-let ld;
-lastDemo.subscribe(value => { ld = value; });
+let lastDemoValue;
+lastDemo.subscribe(value => { lastDemoValue = value; });
 
 let hv;
 historyView.subscribe(value => { hv = value; });
@@ -12,24 +13,20 @@ historyView.subscribe(value => { hv = value; });
 let mounted = false;
 
 onMount(() => {
-  open();
+  console.log("HistoryView: onMount: lastDemoValue: ", lastDemoValue)
+  // open();
   mounted = true;
 });
 
-$: if (mounted) {
-  console.log("Changed lastDemo: ", $lastDemo);
-
+$: if(mounted) {
+  console.log("HistoryView: $: lastDemo: ", $lastDemo);
   open();
 }
 
-function copyDemo (demo) {
-  // make a deep copy
-  return JSON.parse(JSON.stringify(demo))
-}
-
 function open() {
+  console.log("HistoryView: open: lastDemo: ", lastDemoValue)
 
-  var initial = Object.assign(copyDemo(ld), {
+  var initial = Object.assign(lastDemoValue, {
     name: 'ExplainGitZen',
     height: '100%',
   });
