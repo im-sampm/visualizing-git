@@ -3,30 +3,27 @@ import { onMount } from 'svelte';
 import * as d3 from 'd3';
 import yargsParser from 'yargs-parser/browser';
 
-import { lastDemo, historyView } from './store.js';
+import { historyView } from './store.js';
 import demos from './demos.mjs';
-
-let hv;
-historyView.subscribe(value => { hv = value; });
-
-let openSandBoxes = [];
-let selectedDemo;
 
 let mounted = false;
 onMount(() => {
-  console.log("ControlBox: onMount: selectedDemo: ", selectedDemo)  
   mounted = true;
 });
 
 $: if(mounted) {
-  console.log("ControlBox: $: selectedDemo: ", $lastDemo);
   open();
 }
+
+let openSandBoxes = [];
+let selectedDemo;
+let cv = null;
+let terminalOutput;
 
 function reset() {
   for (var i = 0; i < openSandBoxes.length; i++) {
     var osb = openSandBoxes[i];
-    osb.hv.destroy();
+    osb.$historyView.destroy();
     osb.cb.destroy();
     osb.container.style('display', 'none');
   }
@@ -35,8 +32,6 @@ function reset() {
   console.log(d3);
   d3.selectAll('a.openswitch').classed('selected', false);
 };
-
-let cv = null;
 
 function open() {
   //reset()
@@ -51,7 +46,7 @@ function open() {
   }
 
   cv = new ControlBox({
-    historyView: hv,
+    historyView: $historyView,
     originView: null,
     initialMessage: "",
     undoHistory: savedState 
@@ -81,13 +76,12 @@ function ControlBox(config) {
   this.originView = config.originView;
   this.initialMessage = config.initialMessage || '';
   this.rebaseConfig = {}; // to configure branches for rebase
-  this.terminalOutput = d3.select('div.log');
 
   this.undoHistory = config.undoHistory || {
     pointer: 0,
     stack: [
       {
-        hv: this.historyView.serialize(),
+        $historyView: this.historyView.serialize(),
         // ov: this.originView && this.originView.serialize()
       }
     ]
@@ -110,7 +104,7 @@ ControlBox.prototype = {
 
   createUndoSnapshot: function (replace) {
     var state = {
-      hv: this.historyView.serialize(),
+      $historyView: this.historyView.serialize(),
       ov: (this.originView && this.originView.serialize()) || 'null'
     }
     if (!replace) {
@@ -131,9 +125,6 @@ ControlBox.prototype = {
   },
 
   getRepoView: function () {
-    console.log("historyView: ", this.historyView);
-    console.log("originView: ", this.originView);
-    console.log("mode: ", this.mode);
     if (this.mode === 'local') {
       return this.historyView
     } else if (this.mode === 'origin') {
@@ -156,7 +147,7 @@ ControlBox.prototype = {
 
 
   destroy: function() {
-    this.terminalOutput.remove();
+    d3.select(terminalOutput).remove();
     this.input.remove();
     // this.container.remove();
 
@@ -168,7 +159,7 @@ ControlBox.prototype = {
   },
 
   _scrollToBottom: function() {
-    var log = this.terminalOutput.node();
+    var log = d3.select(terminalOutput).node();
     log.scrollTop = log.scrollHeight;
   },
 
@@ -181,7 +172,6 @@ ControlBox.prototype = {
     document.getElementById('last-command').textContent = entry
 
     if (entry.trim() === 'help' || entry.trim() === 'help()') {
-      this.info('pres() = Turn on presenter mode')
       this.info('undo = Undo the last git command')
       this.info('redo = Redo the last undone git command')
       this.info('mode = Change mode (`local` or `remote`)')
@@ -208,11 +198,6 @@ ControlBox.prototype = {
       return
     }
 
-    // if (entry === 'pres()') {
-    //   window.pres()
-    //   return
-    // }
-
     if (entry.toLowerCase().indexOf('mode ') === 0) {
       var mode = entry.split(' ').pop()
       this.changeMode(mode)
@@ -223,14 +208,14 @@ ControlBox.prototype = {
       var lastId: number = this.undoHistory.pointer - 1
       var lastState = this.undoHistory.stack[lastId]
       if (lastState) {
-        this.historyView.deserialize(lastState.hv)
+        this.historyView.deserialize(lastState.$historyView)
         this.originView && this.originView.deserialize(lastState.ov)
         this.undoHistory.pointer = lastId
       } else {
         this.error("Nothing to undo")
       }
       this.persist()
-      this.terminalOutput.append('div')
+      d3.select(terminalOutput).append('div')
         .classed('command-entry', true)
         .html(entry);
       this._scrollToBottom();
@@ -241,14 +226,14 @@ ControlBox.prototype = {
       var lastId: number = this.undoHistory.pointer + 1
       var lastState = this.undoHistory.stack[lastId]
       if (lastState) {
-        this.historyView.deserialize(lastState.hv)
+        this.historyView.deserialize(lastState.$historyView)
         this.originView && this.originView.deserialize(lastState.ov)
         this.undoHistory.pointer = lastId
       } else {
         this.error("Nothing to redo")
       }
       this.persist()
-      this.terminalOutput.append('div')
+      d3.select(terminalOutput).append('div')
         .classed('command-entry', true)
         .html(entry);
       this._scrollToBottom();
@@ -263,7 +248,7 @@ ControlBox.prototype = {
           setTimeout(() => {
             var lastState = this.undoHistory.stack[index];
             if (lastState) {
-              this.historyView.deserialize(lastState.hv);
+              this.historyView.deserialize(lastState.$historyView);
               this.originView && this.originView.deserialize(lastState.ov);
             } else {
               this.error("Nothing to redo");
@@ -272,7 +257,7 @@ ControlBox.prototype = {
               var reason = this.historyView.logs.head[0].reason;
               console.log(this.historyView.logs.head[0]);
               
-              this.terminalOutput
+              d3.select(terminalOutput)
                 .append("div")
                 .classed("command-entry", true)
                 .html(reason);
@@ -392,7 +377,7 @@ ControlBox.prototype = {
 
     var split = entry.split(' ');
 
-    this.terminalOutput.append('div')
+    d3.select(terminalOutput).append('div')
       .classed('command-entry', true)
       .html(entry);
 
@@ -423,13 +408,13 @@ ControlBox.prototype = {
   },
 
   info: function(msg) {
-    this.terminalOutput.append('div').classed('info', true).html(msg);
+    d3.select(terminalOutput).append('div').classed('info', true).html(msg);
     this._scrollToBottom();
   },
 
   error: function(msg) {
     msg = msg || 'I don\'t understand that.';
-    this.terminalOutput.append('div').classed('error', true).html(msg);
+    d3.select(terminalOutput).append('div').classed('error', true).html(msg);
     this._scrollToBottom();
   },
 
@@ -1155,5 +1140,5 @@ function handleKeyup(e) {
     {/each}
   </select>
   <input bind:this={commandInput} bind:value={inputValue} on:keyup={handleKeyup} type="text" class="input" placeholder="enter git command" />
-  <div class="log"></div>
+  <div bind:this={terminalOutput} class="log"></div>
 </div>

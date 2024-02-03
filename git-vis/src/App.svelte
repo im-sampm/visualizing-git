@@ -7,9 +7,6 @@ import ControlBox from './ControlBox.svelte';
 import { lastDemo } from './store.js';
 import demos from './demos.mjs';
 
-let lastDemoValue;
-lastDemo.subscribe(value => { lastDemoValue = value; });
-
 let selectedDemo;
 
 function clearSavedState () {
@@ -54,7 +51,7 @@ onMount(() => {
   }
 
   lastDemo.set(findDemo(demos, window.location.hash.slice(1)) || demos[0]);
-  selectedDemo = lastDemoValue.key;
+  selectedDemo = $lastDemo.key;
   console.log("App: onMount: lastDemo: ", lastDemo)
 });
 

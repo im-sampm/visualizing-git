@@ -3,20 +3,12 @@ import { onMount } from 'svelte';
 import * as d3 from 'd3';
 import { lastDemo, historyView } from './store.js';
 
-let lastDemoValue;
-lastDemo.subscribe(value => { lastDemoValue = value; });
-
-let hv;
-historyView.subscribe(value => { hv = value; });
-
 let mounted = false;
 onMount(() => {
-  console.log("HistoryView: onMount: lastDemoValue: ", lastDemoValue)
   mounted = true;
 });
 
 $: if(mounted) {
-  console.log("HistoryView: $: lastDemo: ", $lastDemo);
   open();
 }
 
@@ -27,9 +19,9 @@ let commitBox;
 let tagBox;
 
 function open() {
-  console.log("HistoryView: open: lastDemo: ", lastDemoValue)
+  console.log("HistoryView: open: lastDemo: ", $lastDemo)
 
-  var initial = Object.assign(lastDemoValue, {
+  var initial = Object.assign($lastDemo, {
     name: 'ExplainGitZen',
     height: '100%',
   });
@@ -39,28 +31,28 @@ function open() {
   args.savedState = args.hvSavedState;
   historyView.set(new HistoryView(args));
 
-  hv.renderCommits();
-  hv._setCurrentBranch(this.currentBranch);
+  $historyView.renderCommits();
+  $historyView._setCurrentBranch($historyView.currentBranch);
   console.log("HistoryView initialized");
 
   // Create a new zoom behavior
   const zoom = d3.zoom()
     .on("zoom", function(event) {
       // Check if the viewBox attribute is set
-      if (!hv.svg.attr("viewBox")) {
+      if (!$historyView.svg.attr("viewBox")) {
         // Set the viewBox attribute to the width and height of the SVG
-        hv.svg.attr("viewBox", "0 0 " + hv.svg.attr("width") + " " + hv.svg.attr("height"));
+        $historyView.svg.attr("viewBox", "0 0 " + $historyView.svg.attr("width") + " " + $historyView.svg.attr("height"));
       }
-      var viewBox = hv.svg.attr("viewBox").split(" ").map(Number);
+      var viewBox = $historyView.svg.attr("viewBox").split(" ").map(Number);
 
       // Update the viewBox values based on the zoom event
       viewBox[0] = -event.transform.x / event.transform.k;
       viewBox[1] = -event.transform.y / event.transform.k;
-      viewBox[2] = hv.svg.attr("width") / event.transform.k;
-      viewBox[3] = hv.svg.attr("height") / event.transform.k;
+      viewBox[2] = $historyView.svg.attr("width") / event.transform.k;
+      viewBox[3] = $historyView.svg.attr("height") / event.transform.k;
 
       // Set the new viewBox values
-      hv.svg.attr("viewBox", viewBox.join(" "));
+      $historyView.svg.attr("viewBox", viewBox.join(" "));
     });
 
   // Call the zoom behavior on the SVG element
