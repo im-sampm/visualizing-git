@@ -20,6 +20,12 @@ $: if(mounted) {
   open();
 }
 
+let svg_container;
+let svg_svg_container;
+let arrowBox;
+let commitBox;
+let tagBox;
+
 function open() {
   console.log("HistoryView: open: lastDemo: ", lastDemoValue)
 
@@ -33,11 +39,12 @@ function open() {
   args.savedState = args.hvSavedState;
   historyView.set(new HistoryView(args));
 
-  hv.render();
+  hv.renderCommits();
+  hv._setCurrentBranch(this.currentBranch);
   console.log("HistoryView initialized");
 
   // Create a new zoom behavior
-  hv.zoom = d3.zoom()
+  const zoom = d3.zoom()
     .on("zoom", function(event) {
       // Check if the viewBox attribute is set
       if (!hv.svg.attr("viewBox")) {
@@ -57,8 +64,7 @@ function open() {
     });
 
   // Call the zoom behavior on the SVG element
-  var container = d3.select('.svg-container')
-  container.call(hv.zoom);
+  d3.select(svg_container).call(zoom);
 }
  
 var REG_MARKER_END = 'url(#triangle)',
@@ -303,10 +309,6 @@ function HistoryView(config) {
     }.bind(this))
   }
 
-  this.svg = null;
-  this.arrowBox = null;
-  this.commitBox = null;
-  this.tagBox = null;
 }
 
 HistoryView.generateId = function() {
@@ -513,7 +515,7 @@ HistoryView.prototype = {
    * @return {d3 Selection} the d3 selected SVG circle
    */
   getCircle: function(ref) {
-    var circle = this.svg.select('#' + this.name + '-' + ref),
+    var circle = d3.select(svg_svg_container).select('#' + this.name + '-' + ref),
       commit;
 
     if (circle && !circle.empty()) {
@@ -526,57 +528,15 @@ HistoryView.prototype = {
       return null;
     }
 
-    return this.svg.select('#' + this.name + '-' + commit.id);
+    return d3.select(svg_svg_container).select('#' + this.name + '-' + commit.id);
   },
 
   getCircles: function() {
-    return this.svg.selectAll('circle.commit');
-  },
-
-  /**
-   * @method render
-   * @param container {String} selector for the container to render the SVG into
-   */
-  render: function() {
-    var svg;
-
-    svg = d3.select('.svg-container svg');
-
-    // svg.attr('id', this.name)
-    //   .attr('width', this.width)
-    //   .attr('height', this.isRemote ? this.height + 150 : this.height);
-
-    if (this.isRemote) {
-      svg.append('svg:text')
-        .classed('remote-name-display', true)
-        .text(this.remoteName)
-        .attr('x', 10)
-        .attr('y', 25);
-    } else {
-      svg.append('svg:text')
-        .classed('remote-name-display', true)
-        .text('Local Repository')
-        .attr('x', 10)
-        .attr('y', 25);
-
-      svg.append('svg:text')
-        .classed('current-branch-display', true)
-        .attr('x', 10)
-        .attr('y', 45);
-    }
-
-    this.svg = svg;
-    this.arrowBox = svg.append('svg:g').classed('pointers', true);
-    this.commitBox = svg.append('svg:g').classed('commits', true);
-    this.tagBox = svg.append('svg:g').classed('tags', true);
-
-    this.renderCommits();
-
-    this._setCurrentBranch(this.currentBranch);
+    return d3.select(svg_svg_container).selectAll('circle.commit');
   },
 
   destroy: function() {
-    this.svg.remove();
+    d3.select(svg_svg_container).remove();
     clearInterval(this.refreshSizeTimer);
 
     for (var prop in this) {
@@ -596,7 +556,7 @@ HistoryView.prototype = {
   },
 
   _resizeSvg: function() {
-    var ele = this.svg.node();
+    var ele = d3.select(svg_svg_container).node();
     var container = ele.parentNode;
     var currentWidth = ele.offsetWidth;
     var newWidth;
@@ -607,7 +567,7 @@ HistoryView.prototype = {
       newWidth = container.offsetWidth - 5;
 
     if (currentWidth != newWidth) {
-      this.svg.attr('width', newWidth);
+      d3.select(svg_svg_container).attr('width', newWidth);
       container.scrollLeft = container.scrollWidth;
     }
   },
@@ -615,12 +575,12 @@ HistoryView.prototype = {
   renderCommits: function() {
     if (typeof this.height === 'string' && this.height.indexOf('%') >= 0) {
       var perc = this.height.substring(0, this.height.length - 1) / 100.0;
-      var baseLineCalcHeight = Math.round(this.svg.node().parentNode.offsetHeight * perc) - 65;
+      var baseLineCalcHeight = Math.round(d3.select(svg_svg_container).node().parentNode.offsetHeight * perc) - 65;
       var newBaseLine = Math.round(baseLineCalcHeight * (this.originalBaseLine || 0.6));
       if (newBaseLine !== this.baseLine) {
         this.baseLine = newBaseLine;
         this.initialCommit.cy = newBaseLine;
-        this.svg.attr('height', baseLineCalcHeight);
+        d3.select(svg_svg_container).attr('height', baseLineCalcHeight);
       }
     }
     this._calculatePositionData();
@@ -638,7 +598,7 @@ HistoryView.prototype = {
       existingCircles,
       newCircles;
 
-    existingCircles = this.commitBox.selectAll('circle.commit')
+    existingCircles = d3.select(commitBox).selectAll('circle.commit')
       .data(this.commitData, function(d) {
         return d.id;
       })
@@ -700,7 +660,7 @@ HistoryView.prototype = {
       .source(d => [px1(d, view, null), py1(d, view, null)])
       .target(d => [px2(d, view, null), py2(d, view, null)])
 
-    existingPointers = this.arrowBox.selectAll('path.commit-pointer')
+    existingPointers = d3.select(arrowBox).selectAll('path.commit-pointer')
       .data(this.commitData.slice(1), function (d) {
         return d.id;
       })
@@ -740,7 +700,7 @@ HistoryView.prototype = {
       .source(d => [px1(d, view, 'parent2'), py1(d, view, 'parent2')])
       .target(d => [px2(d, view, 'parent2'), py2(d, view, 'parent2')])
 
-    existingPointers = this.arrowBox.selectAll('path.merge-pointer')
+    existingPointers = d3.select(arrowBox).selectAll('path.merge-pointer')
       .data(mergeCommits, function(d) {
         return d.id;
       })
@@ -778,7 +738,7 @@ HistoryView.prototype = {
       existingTexts,
       newtexts;
 
-    existingTexts = this.commitBox.selectAll('text.' + className)
+    existingTexts = d3.select(commitBox).selectAll('text.' + className)
       .data(this.commitData, function(d) {
         return d.id;
       })
@@ -859,9 +819,9 @@ HistoryView.prototype = {
       }
     }
 
-    this.svg.selectAll('circle.commit').call(applyBranchlessClass);
-    this.svg.selectAll('line.commit-pointer').call(applyBranchlessClass);
-    this.svg.selectAll('polyline.merge-pointer').call(applyBranchlessClass);
+    d3.select(svg_svg_container).selectAll('circle.commit').call(applyBranchlessClass);
+    d3.select(svg_svg_container).selectAll('line.commit-pointer').call(applyBranchlessClass);
+    d3.select(svg_svg_container).selectAll('polyline.merge-pointer').call(applyBranchlessClass);
   },
 
   renderTags: function() {
@@ -869,7 +829,7 @@ HistoryView.prototype = {
       tagData = this._parseTagData(),
       existingTags, newTags;
 
-    existingTags = this.tagBox.selectAll('g.branch-tag')
+    existingTags = d3.select(tagBox).selectAll('g.branch-tag')
       .data(tagData, function(d) {
         return d.name;
       });
@@ -950,7 +910,7 @@ HistoryView.prototype = {
   },
 
   _setCurrentBranch: function(branch) {
-    var display = this.svg.select('text.current-branch-display'),
+    var display = d3.select(svg_svg_container).select('text.current-branch-display'),
       text = 'HEAD: ';
 
     if (branch && branch.indexOf('/') === -1) {
@@ -1485,7 +1445,7 @@ HistoryView.prototype = {
 };
 </script>
 
-<div class="svg-container">
+<div class="svg-container" bind:this={svg_container}>
   <style>
   .svg-container {
     display: block;
@@ -1636,7 +1596,7 @@ HistoryView.prototype = {
   }
   </style>
 
-  <svg>
+  <svg bind:this={svg_svg_container}>
     <marker id="triangle" refX="5" refY="5" markerUnits="strokeWidth" fill="rgba(100,100,100,1)"
             markerWidth="4" markerHeight="3" orient="auto-start-reverse" viewBox="0 0 10 10">
         <path d="M 0 0 L 10 5 L 0 10 z"/>
@@ -1654,5 +1614,13 @@ HistoryView.prototype = {
         <path d="M 0 0 L 10 5 L 0 10 z"/>
     </marker>
 
+    {#if true}
+      <text class="remote-name-display" x="10" y="25">Local Repository</text>
+      <text class="current-branch-display" x="10" y="45">HEAD: master</text>
+    {/if}
+
+    <g bind:this={arrowBox} class="pointers"></g>
+    <g bind:this={commitBox} class="commits"></g>
+    <g bind:this={tagBox} class="tags"></g>
   </svg>
 </div>

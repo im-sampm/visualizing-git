@@ -50,8 +50,6 @@ function open() {
     savedState = JSON.parse(window.localStorage.getItem('git-viz-snapshot') || 'null')
   }
 
-  d3.select('#ExplainGitZen-Container').style('display', 'block'); 
-
   cv = new ControlBox({
     historyView: hv,
     originView: null,
@@ -83,7 +81,6 @@ function ControlBox(config) {
   this.originView = config.originView;
   this.initialMessage = config.initialMessage || '';
   this.rebaseConfig = {}; // to configure branches for rebase
-
   this.terminalOutput = d3.select('div.log');
 
   this.undoHistory = config.undoHistory || {
