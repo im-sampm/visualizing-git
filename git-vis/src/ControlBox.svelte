@@ -3,14 +3,34 @@ import { onMount } from 'svelte';
 import * as d3 from 'd3';
 import yargsParser from 'yargs-parser/browser';
 
-import { historyView } from './store.js';
+import { lastDemo, historyView } from './store.js';
 import demos from './demos.mjs';
 
 let hv;
 historyView.subscribe(value => { hv = value; });
 
+let ld;
+lastDemo.subscribe(value => { ld = value; });
+lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
+
+let openSandBoxes = [];
 let selectedDemo = window.location.hash.slice(1); // remove the '#' from the hash
-let lastDemo = findDemo(demos, cleanHash(window.location.hash)) || demos[0]
+
+
+function clearSavedState () {
+  if (window.localStorage) {
+    window.localStorage.removeItem('git-viz-snapshot')
+  }
+}
+
+function cleanupDom () {
+  // $('.svg-container.remote-container').remove()
+}
+
+function clean () {
+  clearSavedState()
+  cleanupDom()
+}
 
 function cleanHash (hash) {
   return hash.replace(/^#/, '')
@@ -27,43 +47,54 @@ function copyDemo (demo) {
 }
 
 onMount(() => {
+
+  window.onhashchange = function () {
+    var demo = findDemo(demos, cleanHash(window.location.hash)) || ld 
+    if (demo) {
+      lastDemo.set(demo);
+      // FIXME: Refactor this into a store, if it's really necessary
+      document.getElementById('last-command').textContent = ""
+      clean()
+      open()
+    }
+  }
+
+  lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
   open();
 });
 
+function reset() {
+  for (var i = 0; i < openSandBoxes.length; i++) {
+    var osb = openSandBoxes[i];
+    osb.hv.destroy();
+    osb.cb.destroy();
+    osb.container.style('display', 'none');
+  }
+
+  openSandBoxes.length = 0;
+  console.log(d3);
+  d3.selectAll('a.openswitch').classed('selected', false);
+};
+
 function open() {
+  //reset()
 
-  var initial = Object.assign(copyDemo(lastDemo), {
-    name: 'Zen',
-    height: '100%',
-    initialMessage: "",
-  })
+  var savedState = null
+  if (window.localStorage) {
+    savedState = JSON.parse(window.localStorage.getItem('git-viz-snapshot') || 'null')
+  }
 
-  const prefix = 'ExplainGit';
+  d3.select('#ExplainGitZen-Container').style('display', 'block'); 
 
-  var args = Object.create(initial),
-    name = prefix + args.name,
-    containerId = name + '-Container',
-    container = d3.select('#' + containerId),
-    originView = null,
-    controlBox;
-
-  container.style('display', 'block');
-
-  args.name = name;
-  args.savedState = args.hvSavedState;
-
-  controlBox = new ControlBox({
+  new ControlBox({
     historyView: hv,
     originView: null,
-    initialMessage: args.initialMessage,
-    undoHistory: args.undoHistory
-  });
-
-  controlBox.render();
+    initialMessage: "",
+    undoHistory: savedState 
+  }).render();
 
   console.log("ControlBox initialized");
 }
-
 
 function yargs(str, opts) {
   var result = yargsParser(str, opts)
@@ -94,7 +125,6 @@ function ControlBox(config) {
   this.container = null;
   this.terminalOutput = null;
   this.input = null;
-
 
   this.undoHistory = config.undoHistory || {
     pointer: 0,
@@ -169,22 +199,6 @@ ControlBox.prototype = {
   },
 
   render: function() {
-    let selector = d3.select('.scenario-chooser');
-
-    selector.on('change', function (e) {
-      let sel = selector.node() as HTMLSelectElement;
-      if (!confirm('This will erase your current progress. Continue?')) {
-        e.preventDefault()
-        e.stopPropagation()
-        sel.value = window.location.hash.replace(/^#/, '') || demos[0].key
-        return false
-      }
-      var currentDemo = window.location.hash
-      var newDemo = sel.options[sel.selectedIndex].value
-      if (('#' + newDemo) !== currentDemo) {
-        window.location.hash = newDemo
-      }
-    })
 
     // Focus on the input box on page load
     let input: any = d3.select('input.input');
@@ -1095,6 +1109,23 @@ ControlBox.prototype = {
     }
   }
 };
+
+function handleChange(e) {
+  if (!confirm('This will erase your current progress. Continue?')) {
+    e.preventDefault();
+    e.stopPropagation();
+    selectedDemo = window.location.hash.replace(/^#/, '') || demos[0].key;
+    return false;
+  }
+
+  let newDemo = e.target.value;
+  if (('#' + newDemo) !== window.location.hash) {
+    window.location.hash = newDemo;
+  }
+}
+
+let input;
+
 </script>
 
 <pre id='last-command' style='display: none;'></pre>
@@ -1172,7 +1203,7 @@ ControlBox.prototype = {
   }
   </style>
 
-  <select class="scenario-chooser" bind:value={selectedDemo}>
+  <select class="scenario-chooser" bind:value={selectedDemo} on:change={handleChange}>
     {#each demos as demo}
       <option value={demo.key}>{demo.title}</option>
     {/each}

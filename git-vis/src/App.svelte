@@ -8,86 +8,86 @@ import demos from './demos.mjs';
 import HistoryView from './HistoryView.svelte';
 import ControlBox from './ControlBox.svelte';
 
-let ld;
-lastDemo.subscribe(value => { ld = value; });
-lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
+// let ld;
+// lastDemo.subscribe(value => { ld = value; });
+// lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
 
-let openSandBoxes = [];
+// let openSandBoxes = [];
 
-function clearSavedState () {
-  if (window.localStorage) {
-    window.localStorage.removeItem('git-viz-snapshot')
-  }
-}
+// function clearSavedState () {
+//   if (window.localStorage) {
+//     window.localStorage.removeItem('git-viz-snapshot')
+//   }
+// }
 
-function cleanupDom () {
-  // $('.svg-container.remote-container').remove()
-}
+// function cleanupDom () {
+//   // $('.svg-container.remote-container').remove()
+// }
 
-function clean () {
-  clearSavedState()
-  cleanupDom()
-}
+// function clean () {
+//   clearSavedState()
+//   cleanupDom()
+// }
 
-function cleanHash (hash) {
-  return hash.replace(/^#/, '')
-}
+// function cleanHash (hash) {
+//   return hash.replace(/^#/, '')
+// }
 
-function findDemo (demos, name) {
-  return demos.filter(function (d) {
-    return d.key === name
-  })[0]
-}
+// function findDemo (demos, name) {
+//   return demos.filter(function (d) {
+//     return d.key === name
+//   })[0]
+// }
 
-function copyDemo (demo) {
-  return JSON.parse(JSON.stringify(demo))
-}
+// function copyDemo (demo) {
+//   return JSON.parse(JSON.stringify(demo))
+// }
 
-onMount(() => {
+// onMount(() => {
 
-  window.onhashchange = function () {
-    var demo = findDemo(demos, cleanHash(window.location.hash)) || ld 
-    if (demo) {
-      lastDemo.set(demo);
-      // FIXME: Refactor this into a store, if it's really necessary
-      document.getElementById('last-command').textContent = ""
-      clean()
-      open()
-    }
-  }
+//   window.onhashchange = function () {
+//     var demo = findDemo(demos, cleanHash(window.location.hash)) || ld 
+//     if (demo) {
+//       lastDemo.set(demo);
+//       // FIXME: Refactor this into a store, if it's really necessary
+//       document.getElementById('last-command').textContent = ""
+//       clean()
+//       open()
+//     }
+//   }
 
-  lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
-});
+//   lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
+// });
 
-function reset() {
-  for (var i = 0; i < openSandBoxes.length; i++) {
-    var osb = openSandBoxes[i];
-    osb.hv.destroy();
-    osb.cb.destroy();
-    osb.container.style('display', 'none');
-  }
+// function reset() {
+//   for (var i = 0; i < openSandBoxes.length; i++) {
+//     var osb = openSandBoxes[i];
+//     osb.hv.destroy();
+//     osb.cb.destroy();
+//     osb.container.style('display', 'none');
+//   }
 
-  openSandBoxes.length = 0;
-  console.log(d3);
-  d3.selectAll('a.openswitch').classed('selected', false);
-};
+//   openSandBoxes.length = 0;
+//   console.log(d3);
+//   d3.selectAll('a.openswitch').classed('selected', false);
+// };
 
 function open() {
   // reset();
 
-  var savedState = null
-  if (window.localStorage) {
-    savedState = JSON.parse(window.localStorage.getItem('git-viz-snapshot') || 'null')
-  }
+  // var savedState = null
+  // if (window.localStorage) {
+  //   savedState = JSON.parse(window.localStorage.getItem('git-viz-snapshot') || 'null')
+  // }
 
-  var initial = Object.assign(copyDemo(ld), {
-    name: 'Zen',
-    height: '100%',
-    initialMessage: ld.message,
-    undoHistory: savedState,
-    hvSavedState: savedState && savedState.stack[savedState.pointer].hv,
-    ovSavedState: savedState && savedState.stack[savedState.pointer].ov
-  })
+  // var initial = Object.assign(copyDemo(ld), {
+  //   name: 'Zen',
+  //   height: '100%',
+  //   initialMessage: ld.message,
+  //   undoHistory: savedState,
+  //   hvSavedState: savedState && savedState.stack[savedState.pointer].hv,
+  //   ovSavedState: savedState && savedState.stack[savedState.pointer].ov
+  // })
 
   // const prefix = 'ExplainGit';
   // var args = Object.create(initial),
