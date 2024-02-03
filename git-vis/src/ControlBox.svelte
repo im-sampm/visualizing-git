@@ -3,8 +3,11 @@ import { onMount } from 'svelte';
 import * as d3 from 'd3';
 import yargsParser from 'yargs-parser/browser';
 
-import { historyView } from './store.js';
+import { lastDemo, historyView } from './store.js';
 import demos from './demos.mjs';
+
+let lastDemoValue;
+lastDemo.subscribe(value => { lastDemoValue = value; });
 
 let hv;
 historyView.subscribe(value => { hv = value; });
@@ -12,20 +15,21 @@ historyView.subscribe(value => { hv = value; });
 let openSandBoxes = [];
 export let selectedDemo;
 
-// $: {
-//   console.log("Changed lastDemo: ", $selectedDemo);
-//   // open();
-// }
 
+let mounted = false;
 onMount(() => {
   console.log("ControlBox: onMount: selectedDemo: ", selectedDemo)  
+  mounted = true;
+});
 
+$: if(mounted) {
+  console.log("ControlBox: $: selectedDemo: ", $lastDemo);
   setTimeout(() => {
     commandInput.focus();
   }, 0);
 
   open();
-});
+}
 
 function reset() {
   for (var i = 0; i < openSandBoxes.length; i++) {
