@@ -42,10 +42,6 @@ function findDemo (demos, name) {
   })[0]
 }
 
-function copyDemo (demo) {
-  return JSON.parse(JSON.stringify(demo))
-}
-
 onMount(() => {
 
   window.onhashchange = function () {
@@ -60,6 +56,11 @@ onMount(() => {
   }
 
   lastDemo.set(findDemo(demos, cleanHash(window.location.hash)) || demos[0]);
+
+  setTimeout(() => {
+    commandInput.focus();
+  }, 0);
+
   open();
 });
 
@@ -76,6 +77,8 @@ function reset() {
   d3.selectAll('a.openswitch').classed('selected', false);
 };
 
+let cv = null;
+
 function open() {
   //reset()
 
@@ -86,12 +89,12 @@ function open() {
 
   d3.select('#ExplainGitZen-Container').style('display', 'block'); 
 
-  new ControlBox({
+  cv = new ControlBox({
     historyView: hv,
     originView: null,
     initialMessage: "",
     undoHistory: savedState 
-  }).render();
+  });
 
   console.log("ControlBox initialized");
 }
@@ -112,19 +115,13 @@ function yargs(str, opts) {
  * @constructor
  */
 function ControlBox(config) {
+  this.mode = 'local'
   this.historyView = config.historyView;
-  console.log("Moghter fucker: ", this.historyView);
   this.originView = config.originView;
   this.initialMessage = config.initialMessage || '';
-  this._commandHistory = [];
-  this._currentCommand = -1;
-  this._tempCommand = '';
   this.rebaseConfig = {}; // to configure branches for rebase
 
-  this.locked = false;
-  this.container = null;
-  this.terminalOutput = null;
-  this.input = null;
+  this.terminalOutput = d3.select('div.log');
 
   this.undoHistory = config.undoHistory || {
     pointer: 0,
@@ -136,8 +133,7 @@ function ControlBox(config) {
     ]
   }
 
-  this.mode = 'local'
-
+  this.info(this.initialMessage);
   this.historyView.on('lock', this.lock.bind(this))
   this.historyView.on('unlock', this.unlock.bind(this))
 }
@@ -198,72 +194,11 @@ ControlBox.prototype = {
     }
   },
 
-  render: function() {
-
-    // Focus on the input box on page load
-    let input: any = d3.select('input.input');
-    setTimeout(function() {
-      (input.node() as HTMLInputElement).focus()
-    })
-
-    let cBox = this;
-    input.on('keyup', function(e) {
-      switch (e.keyCode) {
-        case 13:
-            if ((this as HTMLInputElement).value.trim() === '' || cBox.locked) {
-            return;
-          }
-
-          cBox._commandHistory.unshift(this.value);
-          cBox._tempCommand = '';
-          cBox._currentCommand = -1;
-          cBox.command(this.value);
-          this.value = '';
-          e.stopImmediatePropagation();
-          break;
-        case 38:
-          var previousCommand = cBox._commandHistory[cBox._currentCommand + 1];
-          if (cBox._currentCommand === -1) {
-            cBox._tempCommand = this.value;
-          }
-
-          if (typeof previousCommand === 'string') {
-            cBox._currentCommand += 1;
-            this.value = previousCommand;
-            this.value = this.value; // set cursor to end
-          }
-          e.stopImmediatePropagation();
-          break;
-        case 40:
-          var nextCommand = cBox._commandHistory[cBox._currentCommand - 1];
-          if (typeof nextCommand === 'string') {
-            cBox._currentCommand -= 1;
-            this.value = nextCommand;
-            this.value = this.value; // set cursor to end
-          } else {
-            cBox._currentCommand = -1;
-            this.value = cBox._tempCommand;
-            this.value = this.value; // set cursor to end
-          }
-          e.stopImmediatePropagation();
-          break;
-        default:
-          // FIXME: Refactor this into a store, if it's really necessary
-          document.getElementById('last-command').textContent = document.querySelectorAll(".control-box .input")[0].textContent;
-      }
-    });
-
-    this.container = d3.select('.control-box');
-    this.terminalOutput = d3.select('div.log');
-    this.input = input;
-
-    this.info(this.initialMessage);
-  },
 
   destroy: function() {
     this.terminalOutput.remove();
     this.input.remove();
-    this.container.remove();
+    // this.container.remove();
 
     for (var prop in this) {
       if (this.hasOwnProperty(prop)) {
@@ -1124,8 +1059,58 @@ function handleChange(e) {
   }
 }
 
-let input;
+let commandInput;
+let inputValue = '';
+let _commandHistory = [];
+let _currentCommand = -1;
+let _tempCommand = '';
+let locked = false;
 
+function handleKeyup(e) {
+  switch (e.keyCode) {
+    case 13:
+        if (inputValue.trim() === '' || locked) {
+        return;
+      }
+
+      _commandHistory.unshift(inputValue);
+      _tempCommand = '';
+      _currentCommand = -1;
+      cv.command(inputValue);
+      inputValue = '';
+      e.stopImmediatePropagation();
+      break;
+    case 38:
+      var previousCommand = _commandHistory[_currentCommand + 1];
+      if (_currentCommand === -1) {
+        _tempCommand = inputValue;
+      }
+
+      if (typeof previousCommand === 'string') {
+        _currentCommand += 1;
+        inputValue = previousCommand;
+        inputValue = inputValue; // set cursor to end
+      }
+      e.stopImmediatePropagation();
+      break;
+    case 40:
+      var nextCommand = _commandHistory[_currentCommand - 1];
+      if (typeof nextCommand === 'string') {
+        _currentCommand -= 1;
+        inputValue = nextCommand;
+        inputValue = inputValue; // set cursor to end
+      } else {
+        _currentCommand = -1;
+        inputValue = _tempCommand;
+        inputValue = inputValue; // set cursor to end
+      }
+      e.stopImmediatePropagation();
+      break;
+    default:
+      // FIXME: Refactor this into a store, if it's really necessary
+      document.getElementById('last-command').textContent = document.querySelectorAll(".control-box .input")[0].textContent;
+  }
+}
 </script>
 
 <pre id='last-command' style='display: none;'></pre>
@@ -1201,6 +1186,7 @@ let input;
     border: none;
     line-height: 14px;
   }
+
   </style>
 
   <select class="scenario-chooser" bind:value={selectedDemo} on:change={handleChange}>
@@ -1208,6 +1194,6 @@ let input;
       <option value={demo.key}>{demo.title}</option>
     {/each}
   </select>
-  <input type="text" class="input" placeholder="enter git command" />
+  <input bind:this={commandInput} bind:value={inputValue} on:keyup={handleKeyup} type="text" class="input" placeholder="enter git command" />
   <div class="log"></div>
 </div>

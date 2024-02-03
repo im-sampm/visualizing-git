@@ -1,19 +1,46 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import * as d3 from 'd3';
-
 import { lastDemo, historyView } from './store.js';
 
-let demo2;
-lastDemo.subscribe(value => { demo2 = value; });
+let ld;
+lastDemo.subscribe(value => { ld = value; });
 
 let hv;
 historyView.subscribe(value => { hv = value; });
 
-const prefix = 'ExplainGit';
+let mounted = false;
 
 onMount(() => {
-  open2();
+  open();
+  mounted = true;
+});
+
+$: if (mounted) {
+  console.log("Changed lastDemo: ", $lastDemo);
+
+  open();
+}
+
+function copyDemo (demo) {
+  // make a deep copy
+  return JSON.parse(JSON.stringify(demo))
+}
+
+function open() {
+
+  var initial = Object.assign(copyDemo(ld), {
+    name: 'ExplainGitZen',
+    height: '100%',
+  });
+
+  var args = Object.create(initial);
+
+  args.savedState = args.hvSavedState;
+  historyView.set(new HistoryView(args));
+
+  hv.render();
+  console.log("HistoryView initialized");
 
   // Create a new zoom behavior
   hv.zoom = d3.zoom()
@@ -38,57 +65,13 @@ onMount(() => {
   // Call the zoom behavior on the SVG element
   var container = d3.select('.svg-container')
   container.call(hv.zoom);
-
-});
-
-function copyDemo (demo) {
-  // make a deep copy
-  return JSON.parse(JSON.stringify(demo))
-}
-
-function open2() {
-
-  var initial = Object.assign(copyDemo(demo2), {
-    name: 'Zen',
-    height: '100%',
-  });
-
-  open(initial);
-}
-
-const open = function(_args) {
-  var args = Object.create(_args),
-    name = prefix + args.name,
-    containerId = name + '-Container',
-    container = d3.select('#' + containerId),
-    originView = null,
-    controlBox;
-
-  container.style('display', 'block');
-
-  args.name = name;
-  args.savedState = args.hvSavedState;
-  historyView.set(new HistoryView(args));
-
-  console.log("og historyView: ", hv);
-
-  hv.render();
-  console.log("HistoryView initialized");
-  // window.hv = historyView;
 }
  
 var REG_MARKER_END = 'url(#triangle)',
   MERGE_MARKER_END = 'url(#brown-triangle)',
-  FADED_MARKER_END = 'url(#faded-triangle)',
+  FADED_MARKER_END = 'url(#faded-triangle)';
 
-  preventOverlap,
-  applyBranchlessClass,
-  cx, cy, fixCirclePosition,
-  px1, py1, 
-  px2, py2, 
-  fixIdPosition, tagY, getUniqueSetItems;
-
-preventOverlap = function preventOverlap(commit, view) {
+let preventOverlap = function preventOverlap(commit, view) {
   var commitData = view.commitData,
     baseLine = view.baseLine,
     shift = view.commitRadius * 4.5,
@@ -118,7 +101,7 @@ preventOverlap = function preventOverlap(commit, view) {
   }
 };
 
-applyBranchlessClass = function(selection) {
+let applyBranchlessClass = function(selection) {
   if (selection.empty()) {
     return;
   }
@@ -138,7 +121,7 @@ applyBranchlessClass = function(selection) {
   }
 };
 
-cx = function(commit, view) {
+let cx = function(commit, view) {
   var parent = view.getCommit(commit.parent),
     parentCX = parent.cx;
 
@@ -151,7 +134,7 @@ cx = function(commit, view) {
   return parentCX + (view.commitRadius * 4.5);
 };
 
-cy = function(commit, view) {
+let cy = function(commit, view) {
   var parent = view.getCommit(commit.parent),
     parentCY = parent.cy || cy(parent, view),
     baseLine = view.baseLine,
@@ -194,7 +177,7 @@ cy = function(commit, view) {
   }
 };
 
-fixCirclePosition = function(selection) {
+let fixCirclePosition = function(selection) {
   selection
     .attr('cx', function(d) {
       return d.cx;
@@ -205,7 +188,7 @@ fixCirclePosition = function(selection) {
 };
 
 // calculates the x1 point for commit pointer lines
-px1 = function(commit, view, pp) {
+let px1 = function(commit, view, pp) {
   pp = pp || 'parent';
 
   var parent = view.getCommit(commit[pp]);
@@ -213,28 +196,28 @@ px1 = function(commit, view, pp) {
 };
 
 // calculates the y1 point for commit pointer lines
-py1 = function(commit, view, pp) {
+let py1 = function(commit, view, pp) {
   pp = pp || 'parent';
 
   var parent = view.getCommit(commit[pp]);
   return parent.cy;
 };
 
-px2 = function(commit, view, pp) {
+let px2 = function(commit, view, pp) {
   pp = pp || 'parent';
 
   var parent = view.getCommit(commit[pp]);
   return commit.cx-23;
 };
 
-py2 = function(commit, view, pp) {
+let py2 = function(commit, view, pp) {
   pp = pp || 'parent';
 
   var parent = view.getCommit(commit[pp]);
   return commit.cy;
 };
 
-fixIdPosition = function(selection, view, delta) {
+let fixIdPosition = function(selection, view, delta) {
   selection.attr('x', function(d) {
     return d.cx;
   }).attr('y', function(d) {
@@ -242,7 +225,7 @@ fixIdPosition = function(selection, view, delta) {
   });
 };
 
-tagY = function tagY(t, view) {
+let tagY = function tagY(t, view) {
   var commit = view.getCommit(t.commit),
     commitCY = commit.cy,
     tags = commit.tags,
@@ -259,7 +242,7 @@ tagY = function tagY(t, view) {
   }
 };
 
-getUniqueSetItems = function(set1, set2) {
+let getUniqueSetItems = function(set1, set2) {
   var uniqueSet1 = JSON.parse(JSON.stringify(set1))
   var uniqueSet2 = JSON.parse(JSON.stringify(set2))
   for (var id in set1) {
@@ -326,12 +309,10 @@ function HistoryView(config) {
     }.bind(this))
   }
 
-  this.svgContainer = null;
   this.svg = null;
   this.arrowBox = null;
   this.commitBox = null;
   this.tagBox = null;
-
 }
 
 HistoryView.generateId = function() {
@@ -412,7 +393,7 @@ HistoryView.prototype = {
    * @return {Object} the commit datum object
    */
   getCommit: function getCommit(ref) {
-    console.log("CommitData: ", this.commitData);
+    // console.log("CommitData: ", this.commitData);
     // Optimization, doesn't seem to break anything
     if (!ref) return null;
     if (ref.id) return ref
@@ -563,19 +544,13 @@ HistoryView.prototype = {
    * @param container {String} selector for the container to render the SVG into
    */
   render: function() {
-    var svgContainer, svg;
-
-    svgContainer = d3.select('.svg-container');
-
-    // if (this.isRemote) {
-    //   $(svgContainer).draggable();
-    // }
+    var svg;
 
     svg = d3.select('.svg-container svg');
 
-    svg.attr('id', this.name)
-      .attr('width', this.width)
-      .attr('height', this.isRemote ? this.height + 150 : this.height);
+    // svg.attr('id', this.name)
+    //   .attr('width', this.width)
+    //   .attr('height', this.isRemote ? this.height + 150 : this.height);
 
     if (this.isRemote) {
       svg.append('svg:text')
@@ -596,7 +571,6 @@ HistoryView.prototype = {
         .attr('y', 45);
     }
 
-    this.svgContainer = svgContainer;
     this.svg = svg;
     this.arrowBox = svg.append('svg:g').classed('pointers', true);
     this.commitBox = svg.append('svg:g').classed('commits', true);
@@ -609,7 +583,6 @@ HistoryView.prototype = {
 
   destroy: function() {
     this.svg.remove();
-    this.svgContainer.remove();
     clearInterval(this.refreshSizeTimer);
 
     for (var prop in this) {
@@ -730,8 +703,8 @@ HistoryView.prototype = {
       newPointers;
 
     var link = d3.linkHorizontal()
-      .source(d => [px1(d, view), py1(d, view)])
-      .target(d => [px2(d, view), py2(d, view)])
+      .source(d => [px1(d, view, null), py1(d, view, null)])
+      .target(d => [px2(d, view, null), py2(d, view, null)])
 
     existingPointers = this.arrowBox.selectAll('path.commit-pointer')
       .data(this.commitData.slice(1), function (d) {
@@ -1431,7 +1404,6 @@ HistoryView.prototype = {
       throw new Error('Cannot find ref: ' + ref);
     }
 
-
     if (currentCommit.id === mergeTarget.id) {
       throw new Error('Already up-to-date.');
     } else if (currentCommit.parent2 === mergeTarget.id) {
@@ -1668,8 +1640,8 @@ HistoryView.prototype = {
     font-weight: bold;
     text-transform: uppercase;
   }
-
   </style>
+
   <svg>
     <marker id="triangle" refX="5" refY="5" markerUnits="strokeWidth" fill="rgba(100,100,100,1)"
             markerWidth="4" markerHeight="3" orient="auto-start-reverse" viewBox="0 0 10 10">
