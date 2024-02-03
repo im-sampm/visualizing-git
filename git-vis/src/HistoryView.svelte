@@ -17,22 +17,35 @@ let svg_svg_container;
 let arrowBox;
 let commitBox;
 let tagBox;
+let currentBranch;
+
+function setCurrentBranch(branch) {
+  var text = 'HEAD: ';
+
+  if (branch && branch.indexOf('/') === -1) {
+    text += branch;
+    $historyView.currentBranch = branch;
+  } else {
+    text += ' (detached head)';
+    $historyView.currentBranch = null;
+  }
+
+  currentBranch = text;
+}
 
 function open() {
   console.log("HistoryView: open: lastDemo: ", $lastDemo)
 
-  var initial = Object.assign($lastDemo, {
+  let args = Object.assign($lastDemo, {
     name: 'ExplainGitZen',
     height: '100%',
+    savedState: $lastDemo.hvSavedState,
   });
 
-  var args = Object.create(initial);
-
-  args.savedState = args.hvSavedState;
   historyView.set(new HistoryView(args));
 
   $historyView.renderCommits();
-  $historyView._setCurrentBranch($historyView.currentBranch);
+  setCurrentBranch($historyView.currentBranch);
   console.log("HistoryView initialized");
 
   // Create a new zoom behavior
@@ -901,21 +914,6 @@ HistoryView.prototype = {
     this._markBranchlessCommits();
   },
 
-  _setCurrentBranch: function(branch) {
-    var display = d3.select(svg_svg_container).select('text.current-branch-display'),
-      text = 'HEAD: ';
-
-    if (branch && branch.indexOf('/') === -1) {
-      text += branch;
-      this.currentBranch = branch;
-    } else {
-      text += ' (detached head)';
-      this.currentBranch = null;
-    }
-
-    display.text(text);
-  },
-
   addReflogEntry: function(ref, destination, reason) {
     ref = ref.toLowerCase()
     this.logs[ref] = this.logs[ref] || []
@@ -1216,7 +1214,7 @@ HistoryView.prototype = {
     }
 
     var isBranch = this.branches.indexOf(ref) !== -1
-    this._setCurrentBranch(isBranch ? ref : null);
+    setCurrentBranch(isBranch ? ref : null);
     this.moveTag('HEAD', commit.id);
     this.renderTags();
 
@@ -1419,7 +1417,7 @@ HistoryView.prototype = {
           if (origBranch) {
             this.moveTag(origBranch, newHeadCommit.id)
             this.reset(origBranch)
-            this._setCurrentBranch(origBranch)
+            setCurrentBranch(origBranch)
             this.addReflogEntry(
               'HEAD', this.getCommit('HEAD').id, 'rebase finished: returning to refs/heads/' + origBranch
             )
@@ -1608,7 +1606,8 @@ HistoryView.prototype = {
 
     {#if true}
       <text class="remote-name-display" x="10" y="25">Local Repository</text>
-      <text class="current-branch-display" x="10" y="45">HEAD: master</text>
+
+      <text class="current-branch-display" x="10" y="45">{currentBranch}</text>
     {/if}
 
     <g bind:this={arrowBox} class="pointers"></g>
