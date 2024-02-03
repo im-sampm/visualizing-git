@@ -67,7 +67,7 @@ onMount(() => {
     <TabItem open title="Playground">
       <div class="playground-container">
         <HistoryView />
-        <ControlBox selectedDemo={selectedDemo} />
+        <ControlBox />
       </div>
     </TabItem>
 </Tabs>

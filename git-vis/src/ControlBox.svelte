@@ -6,15 +6,11 @@ import yargsParser from 'yargs-parser/browser';
 import { lastDemo, historyView } from './store.js';
 import demos from './demos.mjs';
 
-let lastDemoValue;
-lastDemo.subscribe(value => { lastDemoValue = value; });
-
 let hv;
 historyView.subscribe(value => { hv = value; });
 
 let openSandBoxes = [];
-export let selectedDemo;
-
+let selectedDemo;
 
 let mounted = false;
 onMount(() => {
@@ -24,10 +20,6 @@ onMount(() => {
 
 $: if(mounted) {
   console.log("ControlBox: $: selectedDemo: ", $lastDemo);
-  setTimeout(() => {
-    commandInput.focus();
-  }, 0);
-
   open();
 }
 
@@ -48,6 +40,10 @@ let cv = null;
 
 function open() {
   //reset()
+
+  setTimeout(() => {
+    commandInput.focus();
+  }, 0);
 
   var savedState = null
   if (window.localStorage) {
@@ -90,19 +86,19 @@ function ControlBox(config) {
 
   this.terminalOutput = d3.select('div.log');
 
-  // this.undoHistory = config.undoHistory || {
-  //   pointer: 0,
-  //   stack: [
-  //     {
-  //       hv: this.historyView.serialize(),
-  //       // ov: this.originView && this.originView.serialize()
-  //     }
-  //   ]
-  // }
+  this.undoHistory = config.undoHistory || {
+    pointer: 0,
+    stack: [
+      {
+        hv: this.historyView.serialize(),
+        // ov: this.originView && this.originView.serialize()
+      }
+    ]
+  }
 
   this.info(this.initialMessage);
-  // this.historyView.on('lock', this.lock.bind(this))
-  // this.historyView.on('unlock', this.unlock.bind(this))
+  this.historyView.on('lock', this.lock.bind(this))
+  this.historyView.on('unlock', this.unlock.bind(this))
 }
 
 ControlBox.prototype = {

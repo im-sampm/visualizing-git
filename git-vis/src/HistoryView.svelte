@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import * as d3 from 'd3';
-// import { lastDemo, historyView } from './store.js';
 import { lastDemo, historyView } from './store.js';
 
 let lastDemoValue;
@@ -11,10 +10,8 @@ let hv;
 historyView.subscribe(value => { hv = value; });
 
 let mounted = false;
-
 onMount(() => {
   console.log("HistoryView: onMount: lastDemoValue: ", lastDemoValue)
-  // open();
   mounted = true;
 });
 
