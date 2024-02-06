@@ -9,7 +9,8 @@
 			"extensions": [
 				"mhutchie.git-graph",
 				"svelte.svelte-vscode",
-				"RafaelMartinez.svelte-preview"
+				"RafaelMartinez.svelte-preview",
+				"bradlc.vscode-tailwindcss"
 			]
 		}
 	}
