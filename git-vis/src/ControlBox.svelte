@@ -1053,92 +1053,65 @@ function handleKeyup(e) {
       break;
     default:
       // FIXME: Refactor this into a store, if it's really necessary
-      document.getElementById('last-command').textContent = document.querySelectorAll(".control-box .input")[0].textContent;
+      document.getElementById('last-command').textContent = document.querySelectorAll("input.control-box")[0].textContent;
   }
 }
+
+
+  import { Input, Button, Dropdown, DropdownItem } from 'flowbite-svelte';
+  import { SearchOutline, ChevronDownSolid } from 'flowbite-svelte-icons';
+
+  let selectCategory = 'All categories'
 </script>
 
 <pre id='last-command' style='display: none;'></pre>
 <div class="control-box" style="color: black;">
-  <style>
-  .control-box {
-    display: block;
-    /* position: absolute; */
-    top: 0px;
-    bottom: 0;
-    /* width: 250px; */
-    vertical-align: bottom;
-    border: 1px dotted #AAA;
-  }
 
-  .control-box select {
-  }
-
-  .control-box button {
-    /* font-family: Courier New; */
-    font-size: 12px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-  }
-
-  .control-box .log {
-    overflow-y: auto;
-    /* position: absolute; */
-    background: #cecece;
-    top: 30px;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    border-bottom: 1px solid #AAA;
-    text-align: left;
-    max-height: 100px;
-  }
-
-  .control-box .log .reflog-entry, .control-box .log .log-entry {
-    display: inline-block;
-    padding-left: 15px;
-    text-indent: -15px;
-  }
-
-  .control-box .log, .control-box input[type="text"], .control-box .input {
-    /* font-family: Courier New; */
-    font-size: 14px;
-  }
-
-  .control-box .log .command-entry {
-    padding-left: 5px;
-    color: #FFF;
-    line-height: 14px;
-    /* background: url(../images/prompt.gif) no-repeat left top black; */
-  }
-
-  .control-box .log .info, .control-box .log .error {
-    font-size: 12px;
-    padding: 5px;
-  }
-
-  .control-box .log .info {
-    color: black;
-  }
-
-  .control-box .log .error {
-    color: black;
-  }
-
-  .control-box input[type="text"] {
-    width: 100%;
-    display: block;
-    border: none;
-    line-height: 14px;
-  }
-
-  </style>
-
-  <select class="scenario-chooser" bind:value={selectedDemo} on:change={handleChange}>
+  <!-- <select class="scenario-chooser" bind:value={selectedDemo} on:change={handleChange}>
     {#each demos as demo}
       <option value={demo.key}>{demo.title}</option>
     {/each}
-  </select>
-  <input bind:this={commandInput} bind:value={inputValue} on:keyup={handleKeyup} type="text" class="input" placeholder="enter git command" />
-  <div bind:this={terminalOutput} class="log"></div>
+  </select> -->
+  <!-- <input bind:this={commandInput} bind:value={inputValue} on:keyup={handleKeyup} type="text" class="input" placeholder="enter git command" /> -->
+  <!-- <div bind:this={terminalOutput} class="log"></div> -->
+
+  <!-- Input box -->
+  <div class="flex">
+    <div class="relative">
+      <pre id='last-command' style='display: none;'></pre>
+      <Button class="rounded-none py-2.5 whitespace-nowrap border border-e-0 border-primary-700">
+        {selectCategory}
+        <ChevronDownSolid class="w-2.5 h-2.5 ms-2.5" />
+      </Button>
+      <Dropdown>
+        {#each demos as  demo }
+          <DropdownItem
+            on:click={() => {
+              selectCategory = demo.title;
+            }}
+          >
+            {demo.title}
+          </DropdownItem>
+        {/each}
+      </Dropdown>
+    </div>
+    <Input let:props>
+      <input type="text" {...props} class="control-box rounded-none py-2.5 w-full" placeholder="enter git command" bind:this={commandInput} bind:value={inputValue} on:keyup={handleKeyup} />
+    </Input>
+    <Button class="!p-2.5 rounded-none">
+      <SearchOutline class="w-5 h-5" />
+    </Button>
+  </div>
+
+  <!-- Accordion -->
+  <div class="bg-gray-300 p-4 rounded-b-lg">
+    <details class="mb-4" open>
+      <summary class="cursor-pointer text-sm font-bold">
+        Log
+      </summary >
+      <div class="mt-2">
+        <div bind:this={terminalOutput} class="log"></div>
+      </div>
+    </details>
+  </div>
 </div>
